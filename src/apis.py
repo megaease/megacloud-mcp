@@ -1,5 +1,6 @@
 import dataclasses
-from typing import List
+from enum import Enum
+from typing import Dict, List
 
 from .settings import BACKEND_URL
 from .client import async_client
@@ -109,5 +110,91 @@ async def list_available_hosts() -> List[Host]:
         data = response.json()
         hosts = [Host(**host) for host in data]
         return hosts
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+@dataclasses.dataclass
+class MiddlewareType:
+    id: int
+    name: str
+    middleware_type: int
+
+
+async def list_available_middleware_type() -> List[MiddlewareType]:
+    url = BACKEND_URL + "/v1/middleware/management/services?pageSize=50"
+    response = await async_client.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        types = [MiddlewareType(**type) for type in data["list"]]
+        return types
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+MIDDLEWARE_MAP: Dict[int, str] = {}
+
+
+def get_middleware_name(middleware_type: int) -> str:
+    if len(MIDDLEWARE_MAP) == 0:
+        middleware_types = list_available_middleware_type()
+        for middleware in middleware_types:
+            MIDDLEWARE_MAP[middleware.middleware_type] = middleware.name
+    return MIDDLEWARE_MAP.get(middleware_type, "Unknown")
+
+
+@dataclasses.dataclass
+class MiddlewareInstance:
+    instance_id: int
+    name: str
+    middleware_type: int
+    middleware_name: str
+    major_version: str
+    minor_version: str
+    status: dict
+    frozen: bool
+
+
+async def list_current_middleware_instance() -> List[MiddlewareInstance]:
+    url = (
+        BACKEND_URL
+        + "/v1/middleware/management/instance?name=&hostName=&rows=100&page=1&group=middleware"
+    )
+    response = await async_client.get(url)
+    result = []
+    if response.status_code == 200:
+        data = response.json()
+        for instance in data["list"]:
+            instance["middleware_name"] = get_middleware_name(
+                instance["middleware_type"]
+            )
+            result.append(MiddlewareInstance(**instance))
+        return result
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+class MiddlewareOperations(Enum):
+    RESTART: 5
+    STOP: 4
+    START: 2
+
+
+async def put_middleware_instance(id: int, operation: int):
+    url = (
+        BACKEND_URL + f"/v1/middleware/management/instance/{id}/operations/{operation}"
+    )
+    response = await async_client.put(url)
+    if response.status_code == 200:
+        return "OK"
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def del_middleware_instance(id: int):
+    url = BACKEND_URL + f"/v1/middleware/management/instance/{id}"
+    response = await async_client.delete(url)
+    if response.status_code == 200:
+        return "OK"
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
