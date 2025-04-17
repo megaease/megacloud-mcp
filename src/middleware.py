@@ -1,5 +1,6 @@
-import dataclasses
 from typing import Dict, List
+from pydantic import BaseModel
+
 from . import apis
 from . import utils
 
@@ -7,8 +8,7 @@ from . import utils
 REDIS_NAME = "Redis"
 
 
-@dataclasses.dataclass
-class CreateSingleNodeMiddlewareRequest:
+class CreateSingleNodeMiddlewareRequest(BaseModel):
     middleware_name: str
     host_name: str
     configs: dict
@@ -39,7 +39,7 @@ async def create_single_node_middleware(req: CreateSingleNodeMiddlewareRequest):
         host_name=host.host_name,
         os_arch=host.os_arch,
     )
-    middleware_node = dataclasses.asdict(middleware_node)
+    middleware_node = middleware_node.model_dump()
 
     name = utils.generate_name(req.middleware_name.lower())
     config = apis.CreateMiddlewareInstanceConfig(
@@ -71,8 +71,7 @@ async def create_single_node_redis(host_name: str):
     return response
 
 
-@dataclasses.dataclass
-class CreateClusterMiddlewareRequest:
+class CreateClusterMiddlewareRequest(BaseModel):
     middleware_name: str
     hosts: dict[str, List[str]]
     configs: dict
@@ -120,7 +119,7 @@ async def create_cluster_middleware(req: CreateClusterMiddlewareRequest):
                 os_arch=host.os_arch,
             )
             middleware_nodes.append(middleware_node)
-    req_nodes = [dataclasses.asdict(node) for node in middleware_nodes]
+    req_nodes = [node.model_dump() for node in middleware_nodes]
 
     # create middleware instances
     name = utils.generate_name(req.middleware_name.lower())

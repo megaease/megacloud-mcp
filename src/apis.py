@@ -1,13 +1,12 @@
-import dataclasses
 from enum import Enum
 from typing import Dict, List
+from pydantic import BaseModel
 
 from .settings import BACKEND_URL
 from .client import async_client
 
 
-@dataclasses.dataclass
-class Node:
+class Node(BaseModel):
     node_name: str
     middleware_type: int
     group_tags: str
@@ -42,8 +41,7 @@ async def create_nodes(body: dict) -> List[Node]:
         raise Exception(f"Error: {response.status_code} - {response.text}")
 
 
-@dataclasses.dataclass
-class MiddlewareNode:
+class MiddlewareNode(BaseModel):
     node_name: str
     middleware_type: int
     group_tags: str
@@ -53,8 +51,7 @@ class MiddlewareNode:
     os_arch: str
 
 
-@dataclasses.dataclass
-class CreateMiddlewareInstanceConfig:
+class CreateMiddlewareInstanceConfig(BaseModel):
     middlewareName: str
     middleware_type: int
     name: str
@@ -102,8 +99,7 @@ async def create_middleware_instance(body: dict):
         raise Exception(f"Error: {response.status_code} - {response.text}")
 
 
-@dataclasses.dataclass
-class Host:
+class Host(BaseModel):
     host_id: int
     host_name: str
     ip_addr: str
@@ -125,8 +121,7 @@ async def list_available_hosts() -> List[Host]:
         raise Exception(f"Error: {response.status_code} - {response.text}")
 
 
-@dataclasses.dataclass
-class MiddlewareType:
+class MiddlewareType(BaseModel):
     id: int
     name: str
     middleware_type: int
@@ -163,8 +158,7 @@ async def get_middleware_type(middleware_name: str) -> int:
     return MIDDLEWARE_NAME2TYPE.get(middleware_name.lower(), -1)
 
 
-@dataclasses.dataclass
-class MiddlewareInstance:
+class MiddlewareInstance(BaseModel):
     instance_id: int
     name: str
     middleware_type: int
