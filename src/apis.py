@@ -122,7 +122,6 @@ async def list_available_hosts() -> List[Host]:
 
 
 class MiddlewareType(BaseModel):
-    id: int
     name: str
     middleware_type: int
 
@@ -166,10 +165,9 @@ class MiddlewareInstance(BaseModel):
     major_version: str
     minor_version: str
     status: dict
-    frozen: bool
 
 
-async def list_current_middleware_instance() -> List[MiddlewareInstance]:
+async def list_current_middleware_instances() -> List[MiddlewareInstance]:
     url = (
         BACKEND_URL
         + "/v1/middleware/management/instance?name=&hostName=&rows=100&page=1&group=middleware"
