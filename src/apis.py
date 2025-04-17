@@ -14,12 +14,20 @@ class Node:
     tenant_id: int
 
 
-def create_single_node_request(middleware_type: int) -> dict:
+def create_nodes_request(middleware_type: int, map: Dict[str, int]) -> dict:
+    group_infos = []
+    for group, node_num in map.items():
+        group_info = {
+            "group": group,
+            "group_num": 1,
+            "node_num": node_num,
+            "is_shard": False,
+        }
+        group_infos.append(group_info)
+
     return {
         "middleware_type": middleware_type,
-        "group_infos": [
-            {"group": "master", "group_num": 1, "node_num": 1, "is_shard": False}
-        ],
+        "group_infos": group_infos,
     }
 
 
@@ -54,25 +62,28 @@ class CreateMiddlewareInstanceConfig:
     configs: dict
     major_version: str
     minor_version: str
+    group_configs: List[dict]
 
 
 def create_middleware_instance_request(
     config: CreateMiddlewareInstanceConfig,
 ) -> dict:
+    path = f"{config.middlewareName.lower()}/{config.name}"
+
     request = {
         "middlewareName": config.middlewareName,
         "middleware_type": config.middleware_type,
         "tag_ids": [],
         "name": config.name,
-        "deploy_mode": "0",
+        "deploy_mode": "0" if len(config.nodes) == 1 else "1",
         "nodes": config.nodes,
         "general_config": {
-            "data_dir": f"/data/megaease/redis/{config.name}",
-            "backup_dir": f"/backup/megaease/redis/{config.name}",
-            "log_dir": f"/var/log/megaease/redis/{config.name}",
+            "data_dir": f"/data/megaease/{path}",
+            "backup_dir": f"/backup/megaease/{path}",
+            "log_dir": f"/var/log/megaease/{path}",
         },
         "configs": config.configs,
-        "group_configs": [{"group": "master", "configs": {}}],
+        "group_configs": config.group_configs,
         "node_configs": [],
         "major_version": config.major_version,
         "minor_version": config.minor_version,
@@ -132,15 +143,24 @@ async def list_available_middleware_type() -> List[MiddlewareType]:
         raise Exception(f"Error: {response.status_code} - {response.text}")
 
 
-MIDDLEWARE_MAP: Dict[int, str] = {}
+MIDDLEWARE_TYPE2NAME: Dict[int, str] = {}
+MIDDLEWARE_NAME2TYPE: Dict[str, int] = {}
 
 
-def get_middleware_name(middleware_type: int) -> str:
-    if len(MIDDLEWARE_MAP) == 0:
-        middleware_types = list_available_middleware_type()
+async def get_middleware_name(middleware_type: int) -> str:
+    if len(MIDDLEWARE_TYPE2NAME) == 0:
+        middleware_types = await list_available_middleware_type()
         for middleware in middleware_types:
-            MIDDLEWARE_MAP[middleware.middleware_type] = middleware.name
-    return MIDDLEWARE_MAP.get(middleware_type, "Unknown")
+            MIDDLEWARE_TYPE2NAME[middleware.middleware_type] = middleware.name
+    return MIDDLEWARE_TYPE2NAME.get(middleware_type, "Unknown")
+
+
+async def get_middleware_type(middleware_name: str) -> int:
+    if len(MIDDLEWARE_NAME2TYPE) == 0:
+        middleware_types = await list_available_middleware_type()
+        for middleware in middleware_types:
+            MIDDLEWARE_NAME2TYPE[middleware.name.lower()] = middleware.middleware_type
+    return MIDDLEWARE_NAME2TYPE.get(middleware_name.lower(), -1)
 
 
 @dataclasses.dataclass
@@ -175,9 +195,9 @@ async def list_current_middleware_instance() -> List[MiddlewareInstance]:
 
 
 class MiddlewareOperations(Enum):
-    RESTART: 5
-    STOP: 4
-    START: 2
+    RESTART = 5
+    STOP = 4
+    START = 2
 
 
 async def put_middleware_instance(id: int, operation: int):
