@@ -3,12 +3,13 @@ from typing import List
 
 from mcp.server import Server
 from mcp.types import TextContent, Tool
+from mcp.server.stdio import stdio_server
 
 from . import apis
 from . import utils
 from . import schema
 from . import middleware
-
+from .log import logger
 
 server = Server("megacloud")
 
@@ -100,6 +101,7 @@ async def change_middleware_status(arguments: dict, operation: int) -> List[Text
 
 @server.call_tool()
 async def call_tool(name: str, arguments: dict) -> List[TextContent]:
+    logger.info(f"Call tool: {name}, arguments: {arguments}")
     match name:
         case MegaCloudTools.ListHosts:
             hosts = await apis.list_available_hosts()
@@ -141,4 +143,12 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             resp = await middleware.delete_middleware_status(arg.middleware_instance_name)
             return utils.to_textcontent(resp)
 
-    raise ValueError(f"Unknown tool name: {name}")
+        case _:
+            raise ValueError(f"Unknown tool name: {name}")
+
+
+async def run():
+    logger.info("Server running with stdio transport.")
+    options = server.create_initialization_options()
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(read_stream, write_stream, options, raise_exceptions=True)

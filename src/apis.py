@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from .settings import BACKEND_URL
 from .client import async_client
+from .log import logger
 
 
 class Node(BaseModel):
@@ -38,6 +39,7 @@ async def create_nodes(body: dict) -> List[Node]:
         nodes = [Node(**node) for node in json_data]
         return nodes
     else:
+        logger.error(f"Failed to create nodes: {body}")
         raise Exception(f"Error: {response.status_code} - {response.text}")
 
 
@@ -96,6 +98,7 @@ async def create_middleware_instance(body: dict):
     if response.status_code == 200:
         return response.json()
     else:
+        logger.error(f"Failed to create middleware instance, body: {body}")
         raise Exception(f"Error: {response.status_code} - {response.text}")
 
 
@@ -168,18 +171,13 @@ class MiddlewareInstance(BaseModel):
 
 
 async def list_current_middleware_instances() -> List[MiddlewareInstance]:
-    url = (
-        BACKEND_URL
-        + "/v1/middleware/management/instance?name=&hostName=&rows=100&page=1&group=middleware"
-    )
+    url = BACKEND_URL + "/v1/middleware/management/instance?name=&hostName=&rows=100&page=1&group=middleware"
     response = await async_client.get(url)
     result = []
     if response.status_code == 200:
         data = response.json()
         for instance in data["list"]:
-            instance["middleware_name"] = get_middleware_name(
-                instance["middleware_type"]
-            )
+            instance["middleware_name"] = get_middleware_name(instance["middleware_type"])
             result.append(MiddlewareInstance(**instance))
         return result
     else:
@@ -193,9 +191,7 @@ class MiddlewareOperations(Enum):
 
 
 async def put_middleware_instance(id: int, operation: int):
-    url = (
-        BACKEND_URL + f"/v1/middleware/management/instance/{id}/operations/{operation}"
-    )
+    url = BACKEND_URL + f"/v1/middleware/management/instance/{id}/operations/{operation}"
     response = await async_client.put(url)
     if response.status_code == 200:
         return "OK"
