@@ -177,7 +177,7 @@ async def list_current_middleware_instances() -> List[MiddlewareInstance]:
     if response.status_code == 200:
         data = response.json()
         for instance in data["list"]:
-            instance["middleware_name"] = get_middleware_name(instance["middleware_type"])
+            instance["middleware_name"] = await get_middleware_name(instance["middleware_type"])
             result.append(MiddlewareInstance(**instance))
         return result
     else:

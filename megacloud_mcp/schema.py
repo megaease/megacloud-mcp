@@ -6,6 +6,10 @@ SUPPORTED_MIDDLEWARES = [
 ]
 
 
+class EmptySchema(BaseModel):
+    pass
+
+
 class CreateSingleNodeMiddlewareSchema(BaseModel):
     middleware_type_name: str
     host_name: str

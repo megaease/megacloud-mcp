@@ -51,22 +51,22 @@ async def serve():
             Tool(
                 name=MegaCloudTools.ListHosts,
                 description="List all available hosts that can be used to deploy middleware.",
-                inputSchema={},
+                inputSchema=schema.EmptySchema.model_json_schema(),
             ),
             Tool(
                 name=MegaCloudTools.ListMiddlewareTypes,
                 description="List all middleware types.",
-                inputSchema={},
+                inputSchema=schema.EmptySchema.model_json_schema(),
             ),
             Tool(
                 name=MegaCloudTools.ListMiddlewareInstances,
                 description="List all middleware instances that are currently deployed.",
-                inputSchema={},
+                inputSchema=schema.EmptySchema.model_json_schema(),
             ),
             Tool(
                 name=MegaCloudTools.ListDeployableMiddleware,
                 description="List all middleware types that can be deployed.",
-                inputSchema={},
+                inputSchema=schema.EmptySchema.model_json_schema(),
             ),
             Tool(
                 name=MegaCloudTools.CreateSingleNodeMiddleware,
