@@ -123,9 +123,7 @@ async def create_cluster_middleware(req: CreateClusterMiddlewareRequest):
 
     # create middleware instances
     name = utils.generate_name(req.middleware_name.lower())
-    group_configs = list(
-        map(lambda group: {"group": group, "configs": {}}, req.hosts.keys())
-    )
+    group_configs = list(map(lambda group: {"group": group, "configs": {}}, req.hosts.keys()))
     config = apis.CreateMiddlewareInstanceConfig(
         middlewareName=req.middleware_name,
         middleware_type=middleware_type,
@@ -151,3 +149,35 @@ async def create_cluster_redis(master_hosts: List[str], replica_hosts: List[str]
     )
     response = await create_cluster_middleware(req)
     return response
+
+
+async def change_middleware_status(name: str, operation: int):
+    middleware_instances = await apis.list_current_middleware_instances()
+    instance = list(
+        filter(
+            lambda x: x.name == name,
+            middleware_instances,
+        )
+    )
+    available_names = [instance.name for instance in middleware_instances]
+    if len(instance) == 0:
+        raise Exception(f"Middleware instance {name} not found, available names: {available_names}")
+    instance = instance[0]
+    resp = await apis.put_middleware_instance(instance.instance_id, operation)
+    return resp
+
+
+async def delete_middleware_status(name: str):
+    middleware_instances = await apis.list_current_middleware_instances()
+    instance = list(
+        filter(
+            lambda x: x.name == name,
+            middleware_instances,
+        )
+    )
+    available_names = [instance.name for instance in middleware_instances]
+    if len(instance) == 0:
+        raise Exception(f"Middleware instance {name} not found, available names: {available_names}")
+    instance = instance[0]
+    resp = await apis.del_middleware_instance(instance.instance_id)
+    return resp

@@ -1,16 +1,144 @@
+from enum import Enum
+from typing import List
+
 from mcp.server import Server
 from mcp.types import TextContent, Tool
 
-from . import tools
+from . import apis
+from . import utils
+from . import schema
+from . import middleware
+
 
 server = Server("megacloud")
 
 
+class MegaCloudTools(str, Enum):
+    ListHosts = "list_available_hosts"
+    ListMiddlewareTypes = "list_middleware_types"
+    ListMiddlewareInstances = "list_middleware_instances"
+    ListDeployableMiddleware = "list_deployable_middleware"
+    CreateSingleNodeMiddleware = "create_single_node_middleware"
+    CreateRedisClusterMiddleware = "create_redis_cluster_middleware"
+    RestartMiddleware = "restart_middleware"
+    StopMiddleware = "stop_middleware"
+    StartMiddleware = "start_middleware"
+    DeleteMiddleware = "delete_middleware"
+
+
 @server.list_tools()
 async def list_tools() -> list[Tool]:
-    return await tools.list_tools()
+    return [
+        Tool(
+            name=MegaCloudTools.ListHosts,
+            description="List all available hosts that can be used to deploy middleware.",
+            inputSchema={},
+        ),
+        Tool(
+            name=MegaCloudTools.ListMiddlewareTypes,
+            description="List all middleware types.",
+            inputSchema={},
+        ),
+        Tool(
+            name=MegaCloudTools.ListMiddlewareInstances,
+            description="List all middleware instances that are currently deployed.",
+            inputSchema={},
+        ),
+        Tool(
+            name=MegaCloudTools.ListDeployableMiddleware,
+            description="List all middleware types that can be deployed.",
+            inputSchema={},
+        ),
+        Tool(
+            name=MegaCloudTools.CreateSingleNodeMiddleware,
+            description=f"Create a single node middleware instance, for now only support {schema.SUPPORTED_MIDDLEWARES}",
+            inputSchema=schema.CreateSingleNodeMiddlewareSchema.model_json_schema(),
+        ),
+        Tool(
+            name=MegaCloudTools.CreateRedisClusterMiddleware,
+            description="Create a redis cluster middleware instance.",
+            inputSchema=schema.CreateRedisClusterSchema.model_json_schema(),
+        ),
+        Tool(
+            name=MegaCloudTools.RestartMiddleware,
+            description="Restart a middleware instance.",
+            inputSchema=schema.ChangeMiddlewareStatusSchema.model_json_schema(),
+        ),
+        Tool(
+            name=MegaCloudTools.StopMiddleware,
+            description="Stop a middleware instance.",
+            inputSchema=schema.ChangeMiddlewareStatusSchema.model_json_schema(),
+        ),
+        Tool(
+            name=MegaCloudTools.StartMiddleware,
+            description="Start a middleware instance.",
+            inputSchema=schema.ChangeMiddlewareStatusSchema.model_json_schema(),
+        ),
+        Tool(
+            name=MegaCloudTools.DeleteMiddleware,
+            description="Delete a middleware instance.",
+            inputSchema=schema.ChangeMiddlewareStatusSchema.model_json_schema(),
+        ),
+    ]
+
+
+async def create_single_node_middleware(arguments: dict) -> List[TextContent]:
+    arg = schema.CreateSingleNodeMiddlewareSchema(**arguments)
+    match arg.middleware_type_name.lower():
+        case "redis":
+            resp = await middleware.create_single_node_redis(arg.host_name)
+            return utils.to_textcontent(resp)
+        case _:
+            raise ValueError(f"Unsupported middleware name: {arg.middleware_type_name}, only support {schema.SUPPORTED_MIDDLEWARES}")
+
+
+async def change_middleware_status(arguments: dict, operation: int) -> List[TextContent]:
+    arg = schema.ChangeMiddlewareStatusSchema(**arguments)
+    resp = await middleware.change_middleware_status(arg.middleware_instance_name, operation)
+    return utils.to_textcontent(resp)
 
 
 @server.call_tool()
-async def call_tool(name: str, arguments: dict) -> list[TextContent]:
-    return await tools.call_tool(name, arguments)
+async def call_tool(name: str, arguments: dict) -> List[TextContent]:
+    match name:
+        case MegaCloudTools.ListHosts:
+            hosts = await apis.list_available_hosts()
+            return utils.to_textcontent(hosts)
+
+        case MegaCloudTools.ListMiddlewareTypes:
+            middleware_types = await apis.list_available_middleware_type()
+            return utils.to_textcontent(middleware_types)
+
+        case MegaCloudTools.ListMiddlewareInstances:
+            middleware_instances = await apis.list_current_middleware_instances()
+            return utils.to_textcontent(middleware_instances)
+
+        case MegaCloudTools.ListDeployableMiddleware:
+            return [TextContent(type="text", text=f"{schema.SUPPORTED_MIDDLEWARES}")]
+
+        case MegaCloudTools.CreateSingleNodeMiddleware:
+            return await create_single_node_middleware(arguments)
+
+        case MegaCloudTools.CreateRedisClusterMiddleware:
+            arg = schema.CreateRedisClusterSchema(**arguments)
+            resp = await middleware.create_cluster_redis(arg.master_host_names, arg.replica_host_names)
+            return utils.to_textcontent(resp)
+
+        case MegaCloudTools.RestartMiddleware:
+            resp = await change_middleware_status(arguments, apis.MiddlewareOperations.RESTART.value)
+            return utils.to_textcontent(resp)
+
+        case MegaCloudTools.StopMiddleware:
+            resp = await change_middleware_status(arguments, apis.MiddlewareOperations.STOP.value)
+            return utils.to_textcontent(resp)
+
+        case MegaCloudTools.StartMiddleware:
+            resp = await change_middleware_status(arguments, apis.MiddlewareOperations.START.value)
+            return utils.to_textcontent(resp)
+
+        case MegaCloudTools.DeleteMiddleware:
+            arg = schema.ChangeMiddlewareStatusSchema(**arguments)
+            resp = await middleware.delete_middleware_status(arg.middleware_instance_name)
+            return utils.to_textcontent(resp)
+
+    raise ValueError(f"Unknown tool name: {name}")

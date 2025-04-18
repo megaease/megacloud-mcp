@@ -1,5 +1,5 @@
 import secrets
-from typing import List, Sequence
+from typing import Any, List, Sequence
 
 from pydantic import BaseModel
 from mcp.types import TextContent
@@ -11,7 +11,7 @@ def generate_name(prefix: str):
     return name
 
 
-def to_textcontent(model: BaseModel | Sequence[BaseModel]) -> List[TextContent]:
+def to_textcontent(model: Any) -> List[TextContent]:
     if isinstance(model, Sequence) and not isinstance(model, BaseModel):
         return [
             TextContent(
@@ -20,10 +20,17 @@ def to_textcontent(model: BaseModel | Sequence[BaseModel]) -> List[TextContent]:
             )
             for item in model
         ]
-    else:
+    elif isinstance(model, BaseModel):
         return [
             TextContent(
                 type="text",
                 text=model.model_dump_json(),
+            )
+        ]
+    else:
+        return [
+            TextContent(
+                type="text",
+                text=f"{model}",
             )
         ]
