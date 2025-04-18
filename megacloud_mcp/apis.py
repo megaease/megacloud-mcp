@@ -2,9 +2,9 @@ from enum import Enum
 from typing import Dict, List
 from pydantic import BaseModel
 
-from .settings import BACKEND_URL
-from .client import async_client
-from .log import logger
+from megacloud_mcp.settings import BACKEND_URL
+from megacloud_mcp.client import async_client
+from megacloud_mcp.log import logger
 
 
 class Node(BaseModel):

@@ -5,11 +5,11 @@ from mcp.server import Server
 from mcp.types import TextContent, Tool
 from mcp.server.stdio import stdio_server
 
-from . import apis
-from . import utils
-from . import schema
-from . import middleware
-from .log import logger
+from megacloud_mcp import apis
+from megacloud_mcp import utils
+from megacloud_mcp import schema
+from megacloud_mcp import middleware
+from megacloud_mcp.log import logger
 
 server = Server("megacloud")
 

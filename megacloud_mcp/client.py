@@ -1,6 +1,6 @@
 import os
 import httpx
-from .settings import ENV_AUTHTOKEN
+from megacloud_mcp.settings import ENV_AUTHTOKEN
 
 
 def get_header():

@@ -1,8 +1,8 @@
 from typing import Dict, List
 from pydantic import BaseModel
 
-from . import apis
-from . import utils
+from megacloud_mcp import apis
+from megacloud_mcp import utils
 
 
 REDIS_NAME = "Redis"

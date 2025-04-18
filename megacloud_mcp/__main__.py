@@ -1,5 +1,5 @@
 import asyncio
-from . import server
+from megacloud_mcp import server
 
 if __name__ == "__main__":
     asyncio.run(server.run())
