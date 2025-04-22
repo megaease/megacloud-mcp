@@ -54,7 +54,7 @@ async def serve():
             ),
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
-                description=f"Create a single node middleware instance, for now only support {schema.SUPPORTED_MIDDLEWARES}",
+                description=f"Create a single redis instance.",
                 inputSchema=schema.CreateSingleRedisMiddlewareSchema.model_json_schema(),
             ),
             Tool(
@@ -102,12 +102,12 @@ async def serve():
 
             case MegaCloudTools.CreateSingleRedisMiddleware:
                 arg = schema.CreateSingleRedisMiddlewareSchema(**arguments)
-                resp = await middleware.create_single_node_redis(arg.host_name)
+                resp = await middleware.create_single_node_redis(arg)
                 return utils.to_textcontent(resp)
 
             case MegaCloudTools.CreateRedisClusterMiddleware:
                 arg = schema.CreateRedisClusterSchema(**arguments)
-                resp = await middleware.create_cluster_redis(arg.master_host_names, arg.replica_host_names)
+                resp = await middleware.create_cluster_redis(arg)
                 return utils.to_textcontent(resp)
 
             case MegaCloudTools.RestartMiddleware:

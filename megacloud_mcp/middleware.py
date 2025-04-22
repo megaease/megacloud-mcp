@@ -1,9 +1,9 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 from pydantic import BaseModel
 
 from megacloud_mcp import apis
 from megacloud_mcp import utils
-
+from megacloud_mcp import schema
 
 REDIS_NAME = "Redis"
 
@@ -14,6 +14,7 @@ class CreateSingleNodeMiddlewareRequest(BaseModel):
     configs: dict
     major_version: str
     minor_version: str
+    name: Optional[str] = None
 
 
 async def create_single_node_middleware(req: CreateSingleNodeMiddlewareRequest):
@@ -41,7 +42,7 @@ async def create_single_node_middleware(req: CreateSingleNodeMiddlewareRequest):
     )
     middleware_node = middleware_node.model_dump()
 
-    name = utils.generate_name(req.middleware_name.lower())
+    name = req.name if req.name else utils.generate_name(req.middleware_name.lower())
     config = apis.CreateMiddlewareInstanceConfig(
         middlewareName=req.middleware_name,
         middleware_type=middleware_type,
@@ -59,10 +60,11 @@ async def create_single_node_middleware(req: CreateSingleNodeMiddlewareRequest):
     return response
 
 
-async def create_single_node_redis(host_name: str):
+async def create_single_node_redis(input: schema.CreateSingleRedisMiddlewareSchema):
     req = CreateSingleNodeMiddlewareRequest(
+        name=input.name,
         middleware_name=REDIS_NAME,
-        host_name=host_name,
+        host_name=input.host_name,
         configs={"maxmemory": 4294967296},
         major_version="7.4",
         minor_version="7.4.2",
@@ -72,6 +74,7 @@ async def create_single_node_redis(host_name: str):
 
 
 class CreateClusterMiddlewareRequest(BaseModel):
+    name: Optional[str] = None
     middleware_name: str
     hosts: dict[str, List[str]]
     configs: dict
@@ -122,7 +125,7 @@ async def create_cluster_middleware(req: CreateClusterMiddlewareRequest):
     req_nodes = [node.model_dump() for node in middleware_nodes]
 
     # create middleware instances
-    name = utils.generate_name(req.middleware_name.lower())
+    name = req.name if req.name else utils.generate_name(req.middleware_name.lower())
     group_configs = list(map(lambda group: {"group": group, "configs": {}}, req.hosts.keys()))
     config = apis.CreateMiddlewareInstanceConfig(
         middlewareName=req.middleware_name,
@@ -139,10 +142,11 @@ async def create_cluster_middleware(req: CreateClusterMiddlewareRequest):
     return response
 
 
-async def create_cluster_redis(master_hosts: List[str], replica_hosts: List[str]):
+async def create_cluster_redis(input: schema.CreateRedisClusterSchema):
     req = CreateClusterMiddlewareRequest(
+        name=input.name,
         middleware_name=REDIS_NAME,
-        hosts={"master": master_hosts, "replica": replica_hosts},
+        hosts={"master": input.master_host_names, "replica": input.replica_host_names},
         configs={"maxmemory": 4294967296},
         major_version="7.4",
         minor_version="7.4.2",
