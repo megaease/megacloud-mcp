@@ -12,7 +12,7 @@ def generate_name(prefix: str):
 
 
 def to_textcontent(model: Any) -> List[TextContent]:
-    if isinstance(model, Sequence) and not isinstance(model, BaseModel):
+    if isinstance(model, list) and len(model) > 0 and isinstance(model[0], BaseModel):
         return [
             TextContent(
                 type="text",

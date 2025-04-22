@@ -10,8 +10,7 @@ class EmptySchema(BaseModel):
     pass
 
 
-class CreateSingleNodeMiddlewareSchema(BaseModel):
-    middleware_type_name: str
+class CreateSingleRedisMiddlewareSchema(BaseModel):
     host_name: str
 
 

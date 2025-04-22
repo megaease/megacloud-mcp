@@ -17,23 +17,12 @@ class MegaCloudTools(str, Enum):
     ListHosts = "list_available_hosts"
     ListMiddlewareTypes = "list_middleware_types"
     ListMiddlewareInstances = "list_middleware_instances"
-    ListDeployableMiddleware = "list_deployable_middleware"
-    CreateSingleNodeMiddleware = "create_single_node_middleware"
+    CreateSingleRedisMiddleware = "create_single_redis_middleware"
     CreateRedisClusterMiddleware = "create_redis_cluster_middleware"
     RestartMiddleware = "restart_middleware"
     StopMiddleware = "stop_middleware"
     StartMiddleware = "start_middleware"
     DeleteMiddleware = "delete_middleware"
-
-
-async def create_single_node_middleware(arguments: dict) -> List[TextContent]:
-    arg = schema.CreateSingleNodeMiddlewareSchema(**arguments)
-    match arg.middleware_type_name.lower():
-        case "redis":
-            resp = await middleware.create_single_node_redis(arg.host_name)
-            return utils.to_textcontent(resp)
-        case _:
-            raise ValueError(f"Unsupported middleware name: {arg.middleware_type_name}, only support {schema.SUPPORTED_MIDDLEWARES}")
 
 
 async def change_middleware_status(arguments: dict, operation: int) -> List[TextContent]:
@@ -64,14 +53,9 @@ async def serve():
                 inputSchema=schema.EmptySchema.model_json_schema(),
             ),
             Tool(
-                name=MegaCloudTools.ListDeployableMiddleware,
-                description="List all middleware types that can be deployed.",
-                inputSchema=schema.EmptySchema.model_json_schema(),
-            ),
-            Tool(
-                name=MegaCloudTools.CreateSingleNodeMiddleware,
+                name=MegaCloudTools.CreateSingleRedisMiddleware,
                 description=f"Create a single node middleware instance, for now only support {schema.SUPPORTED_MIDDLEWARES}",
-                inputSchema=schema.CreateSingleNodeMiddlewareSchema.model_json_schema(),
+                inputSchema=schema.CreateSingleRedisMiddlewareSchema.model_json_schema(),
             ),
             Tool(
                 name=MegaCloudTools.CreateRedisClusterMiddleware,
@@ -116,11 +100,10 @@ async def serve():
                 middleware_instances = await apis.list_current_middleware_instances()
                 return utils.to_textcontent(middleware_instances)
 
-            case MegaCloudTools.ListDeployableMiddleware:
-                return [TextContent(type="text", text=f"{schema.SUPPORTED_MIDDLEWARES}")]
-
-            case MegaCloudTools.CreateSingleNodeMiddleware:
-                return await create_single_node_middleware(arguments)
+            case MegaCloudTools.CreateSingleRedisMiddleware:
+                arg = schema.CreateSingleRedisMiddlewareSchema(**arguments)
+                resp = await middleware.create_single_node_redis(arg.host_name)
+                return utils.to_textcontent(resp)
 
             case MegaCloudTools.CreateRedisClusterMiddleware:
                 arg = schema.CreateRedisClusterSchema(**arguments)
