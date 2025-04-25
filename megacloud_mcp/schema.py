@@ -19,5 +19,11 @@ class CreateRedisClusterSchema(BaseModel):
     replica_host_names: list[str]
 
 
+class AddRedisNodeSchema(BaseModel):
+    name: str
+    master_host_names: Optional[list[str]] = None
+    replica_host_names: Optional[list[str]] = None
+
+
 class MiddlewareNameSchema(BaseModel):
     middleware_instance_name: str

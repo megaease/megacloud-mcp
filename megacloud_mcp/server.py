@@ -17,14 +17,18 @@ class MegaCloudTools(str, Enum):
     ListHosts = "list_available_hosts"
     ListMiddlewareTypes = "list_middleware_types"
     ListMiddlewareInstances = "list_middleware_instances"
-    CreateSingleRedisMiddleware = "create_single_redis_middleware"
-    CreateRedisClusterMiddleware = "create_redis_cluster_middleware"
     RestartMiddleware = "restart_middleware"
     StopMiddleware = "stop_middleware"
     StartMiddleware = "start_middleware"
     DeleteMiddleware = "delete_middleware"
     GetMiddlewareInfo = "get_middleware_info"
     GetMiddlewareStatus = "get_middleware_status"
+    BackupMiddleware = "backup_middleware"
+
+    # redis
+    CreateSingleRedisMiddleware = "create_single_redis_middleware"
+    CreateRedisClusterMiddleware = "create_redis_cluster_middleware"
+    AddRedisNodes = "add_redis_nodes"
 
 
 async def change_middleware_state(arguments: dict, operation: int) -> List[TextContent]:
@@ -53,16 +57,6 @@ async def serve():
                 name=MegaCloudTools.ListMiddlewareInstances,
                 description="List all middleware instances that are currently deployed.",
                 inputSchema=schema.EmptySchema.model_json_schema(),
-            ),
-            Tool(
-                name=MegaCloudTools.CreateSingleRedisMiddleware,
-                description=f"Create a single redis instance.",
-                inputSchema=schema.CreateSingleRedisMiddlewareSchema.model_json_schema(),
-            ),
-            Tool(
-                name=MegaCloudTools.CreateRedisClusterMiddleware,
-                description="Create a redis cluster middleware instance.",
-                inputSchema=schema.CreateRedisClusterSchema.model_json_schema(),
             ),
             Tool(
                 name=MegaCloudTools.RestartMiddleware,
@@ -94,6 +88,27 @@ async def serve():
                 description="Get the status of a middleware instance.",
                 inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.BackupMiddleware,
+                description="Backup a middleware instance.",
+                inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
+            ),
+            # redis
+            Tool(
+                name=MegaCloudTools.CreateSingleRedisMiddleware,
+                description=f"Create a single redis instance.",
+                inputSchema=schema.CreateSingleRedisMiddlewareSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.CreateRedisClusterMiddleware,
+                description="Create a redis cluster middleware instance.",
+                inputSchema=schema.CreateRedisClusterSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.AddRedisNodes,
+                description="Add nodes to a redis middleware instance.",
+                inputSchema=schema.AddRedisNodeSchema.model_json_schema(),
+            ),
         ]
 
     @server.call_tool()
@@ -111,16 +126,6 @@ async def serve():
             case MegaCloudTools.ListMiddlewareInstances:
                 middleware_instances = await apis.list_current_middleware_instances()
                 return utils.to_textcontent(middleware_instances)
-
-            case MegaCloudTools.CreateSingleRedisMiddleware:
-                arg = schema.CreateSingleRedisMiddlewareSchema(**arguments)
-                resp = await middleware.create_single_node_redis(arg)
-                return utils.to_textcontent(resp)
-
-            case MegaCloudTools.CreateRedisClusterMiddleware:
-                arg = schema.CreateRedisClusterSchema(**arguments)
-                resp = await middleware.create_cluster_redis(arg)
-                return utils.to_textcontent(resp)
 
             case MegaCloudTools.RestartMiddleware:
                 resp = await change_middleware_state(arguments, apis.MiddlewareOperations.RESTART.value)
@@ -147,6 +152,27 @@ async def serve():
             case MegaCloudTools.GetMiddlewareStatus:
                 arg = schema.MiddlewareNameSchema(**arguments)
                 resp = await middleware.get_middleware_instance_status(arg.middleware_instance_name)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.BackupMiddleware:
+                arg = schema.MiddlewareNameSchema(**arguments)
+                resp = await middleware.backup_middleware_instance(arg.middleware_instance_name)
+                return utils.to_textcontent(resp)
+
+            # redis
+            case MegaCloudTools.CreateSingleRedisMiddleware:
+                arg = schema.CreateSingleRedisMiddlewareSchema(**arguments)
+                resp = await middleware.create_single_node_redis(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.CreateRedisClusterMiddleware:
+                arg = schema.CreateRedisClusterSchema(**arguments)
+                resp = await middleware.create_cluster_redis(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.AddRedisNodes:
+                arg = schema.AddRedisNodeSchema(**arguments)
+                resp = await middleware.add_redis_nodes(arg)
                 return utils.to_textcontent(resp)
 
             case _:

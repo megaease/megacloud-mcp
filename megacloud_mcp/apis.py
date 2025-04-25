@@ -240,3 +240,26 @@ async def get_middleware_instance_id(name: str) -> int:
     instance = instance[0]
     return instance.instance_id
 
+
+async def backup_middleware_instance(id: int):
+    url = BACKEND_URL + f"/v1/middleware/management/backup/{id}/backup-immediately"
+    response = await async_client.post(url)
+    if response.status_code == 200:
+        return "OK"
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+class AddMiddlewareInstanceNodesRequest(BaseModel):
+    nodes: List[MiddlewareNode]
+    node_configs: List[dict]
+    group_configs: List[dict]
+
+
+async def add_middleware_instance_nodes(id: int, req: AddMiddlewareInstanceNodesRequest):
+    url = BACKEND_URL + f"/v1/middleware/management/instance/{id}/add-nodes"
+    response = await async_client.post(url, json=req.model_dump())
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
