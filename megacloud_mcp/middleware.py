@@ -65,7 +65,7 @@ async def create_single_node_redis(input: schema.CreateSingleRedisMiddlewareSche
         name=input.name,
         middleware_name=REDIS_NAME,
         host_name=input.host_name,
-        configs={"maxmemory": 4294967296},
+        configs={"maxmemory": input.max_memory_in_gb * 1024 * 1024 * 1024},
         major_version="7.4",
         minor_version="7.4.2",
     )
@@ -147,7 +147,7 @@ async def create_cluster_redis(input: schema.CreateRedisClusterSchema):
         name=input.name,
         middleware_name=REDIS_NAME,
         hosts={"master": input.master_host_names, "replica": input.replica_host_names},
-        configs={"maxmemory": 4294967296},
+        configs={"maxmemory": input.max_memory_in_gb * 1024 * 1024 * 1024},
         major_version="7.4",
         minor_version="7.4.2",
     )
@@ -155,7 +155,7 @@ async def create_cluster_redis(input: schema.CreateRedisClusterSchema):
     return response
 
 
-async def change_middleware_status(name: str, operation: int):
+async def change_middleware_state(name: str, operation: int):
     middleware_instances = await apis.list_current_middleware_instances()
     instance = list(
         filter(
@@ -171,17 +171,19 @@ async def change_middleware_status(name: str, operation: int):
     return resp
 
 
-async def delete_middleware_status(name: str):
-    middleware_instances = await apis.list_current_middleware_instances()
-    instance = list(
-        filter(
-            lambda x: x.name == name,
-            middleware_instances,
-        )
-    )
-    available_names = [instance.name for instance in middleware_instances]
-    if len(instance) == 0:
-        raise Exception(f"Middleware instance {name} not found, available names: {available_names}")
-    instance = instance[0]
-    resp = await apis.del_middleware_instance(instance.instance_id)
+async def delete_middleware_instance(name: str):
+    id = await apis.get_middleware_instance_id(name)
+    resp = await apis.del_middleware_instance(id)
+    return resp
+
+
+async def get_middleware_instance_info(name: str):
+    id = await apis.get_middleware_instance_id(name)
+    resp = await apis.get_middleware_instance_info(id)
+    return resp
+
+
+async def get_middleware_instance_status(name: str):
+    id = await apis.get_middleware_instance_id(name)
+    resp = await apis.get_middleware_instance_status(id)
     return resp

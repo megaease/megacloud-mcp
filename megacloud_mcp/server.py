@@ -23,11 +23,13 @@ class MegaCloudTools(str, Enum):
     StopMiddleware = "stop_middleware"
     StartMiddleware = "start_middleware"
     DeleteMiddleware = "delete_middleware"
+    GetMiddlewareInfo = "get_middleware_info"
+    GetMiddlewareStatus = "get_middleware_status"
 
 
-async def change_middleware_status(arguments: dict, operation: int) -> List[TextContent]:
-    arg = schema.ChangeMiddlewareStatusSchema(**arguments)
-    resp = await middleware.change_middleware_status(arg.middleware_instance_name, operation)
+async def change_middleware_state(arguments: dict, operation: int) -> List[TextContent]:
+    arg = schema.MiddlewareNameSchema(**arguments)
+    resp = await middleware.change_middleware_state(arg.middleware_instance_name, operation)
     return utils.to_textcontent(resp)
 
 
@@ -65,22 +67,32 @@ async def serve():
             Tool(
                 name=MegaCloudTools.RestartMiddleware,
                 description="Restart a middleware instance.",
-                inputSchema=schema.ChangeMiddlewareStatusSchema.model_json_schema(),
+                inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
             ),
             Tool(
                 name=MegaCloudTools.StopMiddleware,
                 description="Stop a middleware instance.",
-                inputSchema=schema.ChangeMiddlewareStatusSchema.model_json_schema(),
+                inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
             ),
             Tool(
                 name=MegaCloudTools.StartMiddleware,
                 description="Start a middleware instance.",
-                inputSchema=schema.ChangeMiddlewareStatusSchema.model_json_schema(),
+                inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
             ),
             Tool(
                 name=MegaCloudTools.DeleteMiddleware,
                 description="Delete a middleware instance.",
-                inputSchema=schema.ChangeMiddlewareStatusSchema.model_json_schema(),
+                inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.GetMiddlewareInfo,
+                description="Get all information of a middleware instance, like configs, nodes, etc.",
+                inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.GetMiddlewareStatus,
+                description="Get the status of a middleware instance.",
+                inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
             ),
         ]
 
@@ -111,20 +123,30 @@ async def serve():
                 return utils.to_textcontent(resp)
 
             case MegaCloudTools.RestartMiddleware:
-                resp = await change_middleware_status(arguments, apis.MiddlewareOperations.RESTART.value)
+                resp = await change_middleware_state(arguments, apis.MiddlewareOperations.RESTART.value)
                 return utils.to_textcontent(resp)
 
             case MegaCloudTools.StopMiddleware:
-                resp = await change_middleware_status(arguments, apis.MiddlewareOperations.STOP.value)
+                resp = await change_middleware_state(arguments, apis.MiddlewareOperations.STOP.value)
                 return utils.to_textcontent(resp)
 
             case MegaCloudTools.StartMiddleware:
-                resp = await change_middleware_status(arguments, apis.MiddlewareOperations.START.value)
+                resp = await change_middleware_state(arguments, apis.MiddlewareOperations.START.value)
                 return utils.to_textcontent(resp)
 
             case MegaCloudTools.DeleteMiddleware:
-                arg = schema.ChangeMiddlewareStatusSchema(**arguments)
-                resp = await middleware.delete_middleware_status(arg.middleware_instance_name)
+                arg = schema.MiddlewareNameSchema(**arguments)
+                resp = await middleware.delete_middleware_instance(arg.middleware_instance_name)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.GetMiddlewareInfo:
+                arg = schema.MiddlewareNameSchema(**arguments)
+                resp = await middleware.get_middleware_instance_info(arg.middleware_instance_name)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.GetMiddlewareStatus:
+                arg = schema.MiddlewareNameSchema(**arguments)
+                resp = await middleware.get_middleware_instance_status(arg.middleware_instance_name)
                 return utils.to_textcontent(resp)
 
             case _:

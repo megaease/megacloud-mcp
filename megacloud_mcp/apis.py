@@ -206,3 +206,37 @@ async def del_middleware_instance(id: int):
         return "OK"
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def get_middleware_instance_info(id: int) -> dict:
+    url = BACKEND_URL + f"/v1/middleware/management/instance/{id}"
+    response = await async_client.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def get_middleware_instance_status(id: int) -> dict:
+    url = BACKEND_URL + f"/v1/middleware/management/instance/{id}/status"
+    response = await async_client.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def get_middleware_instance_id(name: str) -> int:
+    middleware_instances = await list_current_middleware_instances()
+    instance = list(
+        filter(
+            lambda x: x.name == name,
+            middleware_instances,
+        )
+    )
+    available_names = [instance.name for instance in middleware_instances]
+    if len(instance) == 0:
+        raise Exception(f"Middleware instance {name} not found, available names: {available_names}")
+    instance = instance[0]
+    return instance.instance_id
+
