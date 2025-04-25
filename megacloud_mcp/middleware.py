@@ -266,3 +266,23 @@ async def add_redis_nodes(req: schema.AddRedisNodeSchema):
     middleware_type = await apis.get_middleware_type(REDIS_NAME)
     resp = await add_middleware_nodes(req.name, middleware_type, node_config)
     return resp
+
+
+async def list_middleware_instance_nodes(name: str) -> List[apis.MiddlewareNodeInfo]:
+    id = await apis.get_middleware_instance_id(name)
+    return await apis.list_middleware_instance_nodes(id)
+
+
+async def remove_middleware_instance_nodes(name: str, node_names: List[str]):
+    id = await apis.get_middleware_instance_id(name)
+
+    nodes = await apis.list_middleware_instance_nodes(id)
+    node_ids = []
+    for n in nodes:
+        if n.node_name in node_names:
+            node_ids.append(n.id)
+    if len(node_ids) != len(node_names):
+        raise Exception(f"Node names {node_names} not found in instance {name}")
+
+    resp = await apis.remove_middleware_instance_nodes(id, node_ids)
+    return resp

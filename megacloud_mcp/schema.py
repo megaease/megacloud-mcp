@@ -25,5 +25,10 @@ class AddRedisNodeSchema(BaseModel):
     replica_host_names: Optional[list[str]] = None
 
 
+class RemoveMiddlewareInstanceNodesSchema(BaseModel):
+    name: str
+    node_names: list[str]
+
+
 class MiddlewareNameSchema(BaseModel):
     middleware_instance_name: str

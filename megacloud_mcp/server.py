@@ -24,6 +24,8 @@ class MegaCloudTools(str, Enum):
     GetMiddlewareInfo = "get_middleware_info"
     GetMiddlewareStatus = "get_middleware_status"
     BackupMiddleware = "backup_middleware"
+    ListMiddlewareInstanceNodes = "list_middleware_instance_nodes"
+    RemoveMiddlewareInstanceNodes = "remove_middleware_instance_nodes"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -93,6 +95,16 @@ async def serve():
                 description="Backup a middleware instance.",
                 inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.ListMiddlewareInstanceNodes,
+                description="List all nodes of a middleware instance.",
+                inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.RemoveMiddlewareInstanceNodes,
+                description="Remove nodes from a middleware instance.",
+                inputSchema=schema.RemoveMiddlewareInstanceNodesSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -157,6 +169,16 @@ async def serve():
             case MegaCloudTools.BackupMiddleware:
                 arg = schema.MiddlewareNameSchema(**arguments)
                 resp = await middleware.backup_middleware_instance(arg.middleware_instance_name)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListMiddlewareInstanceNodes:
+                arg = schema.MiddlewareNameSchema(**arguments)
+                resp = await middleware.list_middleware_instance_nodes(arg.middleware_instance_name)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.RemoveMiddlewareInstanceNodes:
+                arg = schema.RemoveMiddlewareInstanceNodesSchema(**arguments)
+                resp = await middleware.remove_middleware_instance_nodes(arg.name, arg.node_names)
                 return utils.to_textcontent(resp)
 
             # redis

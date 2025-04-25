@@ -263,3 +263,39 @@ async def add_middleware_instance_nodes(id: int, req: AddMiddlewareInstanceNodes
         return response.json()
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+class MiddlewareNodeInfo(BaseModel):
+    id: int
+    instance_id: int
+    host_id: int
+    host_ip: str
+    host_name: str
+    status: dict
+    middleware_type: int
+    group_tags: str
+    node_name: str
+    cpu: int
+    memory: int
+    storage: int
+    node_containers: List[dict]
+
+
+async def list_middleware_instance_nodes(id: int) -> List[MiddlewareNodeInfo]:
+    url = BACKEND_URL + f"/v1/middleware/management/instance/{id}/nodes"
+    response = await async_client.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        nodes = [MiddlewareNodeInfo(**node) for node in data]
+        return nodes
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def remove_middleware_instance_nodes(id: int, node_ids: List[int]):
+    url = BACKEND_URL + f"/v1/middleware/management/instance/{id}/remove-nodes"
+    response = await async_client.post(url, json={"nodes": node_ids})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
