@@ -26,6 +26,7 @@ class MegaCloudTools(str, Enum):
     BackupMiddleware = "backup_middleware"
     ListMiddlewareInstanceNodes = "list_middleware_instance_nodes"
     RemoveMiddlewareInstanceNodes = "remove_middleware_instance_nodes"
+    ListMiddlewareInstanceChangeEvents = "list_middleware_instance_change_events"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -105,6 +106,11 @@ async def serve():
                 description="Remove nodes from a middleware instance.",
                 inputSchema=schema.RemoveMiddlewareInstanceNodesSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.ListMiddlewareInstanceChangeEvents,
+                description="List all change events of a middleware instance.",
+                inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -179,6 +185,11 @@ async def serve():
             case MegaCloudTools.RemoveMiddlewareInstanceNodes:
                 arg = schema.RemoveMiddlewareInstanceNodesSchema(**arguments)
                 resp = await middleware.remove_middleware_instance_nodes(arg.name, arg.node_names)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListMiddlewareInstanceChangeEvents:
+                arg = schema.MiddlewareNameSchema(**arguments)
+                resp = await middleware.get_middleware_instance_change_events(arg.middleware_instance_name)
                 return utils.to_textcontent(resp)
 
             # redis

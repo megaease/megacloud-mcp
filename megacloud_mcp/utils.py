@@ -1,6 +1,6 @@
 import secrets
-from typing import Any, List, Sequence
-
+from typing import Any, List
+from datetime import datetime
 from pydantic import BaseModel
 from mcp.types import TextContent
 
@@ -34,3 +34,8 @@ def to_textcontent(model: Any) -> List[TextContent]:
                 text=f"{model}",
             )
         ]
+
+
+def from_unix_mill_to_datetime(unix_mill: int) -> str:
+    dt = datetime.fromtimestamp(unix_mill / 1000.0)
+    return dt.strftime("%Y-%m-%d %H:%M:%S")

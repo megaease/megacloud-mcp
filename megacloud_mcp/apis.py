@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from megacloud_mcp.settings import BACKEND_URL
 from megacloud_mcp.client import async_client
 from megacloud_mcp.log import logger
+from megacloud_mcp.utils import from_unix_mill_to_datetime
 
 
 class Node(BaseModel):
@@ -226,7 +227,7 @@ async def get_middleware_instance_status(id: int) -> dict:
         raise Exception(f"Error: {response.status_code} - {response.text}")
 
 
-async def get_middleware_instance_id(name: str) -> int:
+async def get_middleware_instance(name: str) -> MiddlewareInstance:
     middleware_instances = await list_current_middleware_instances()
     instance = list(
         filter(
@@ -238,6 +239,11 @@ async def get_middleware_instance_id(name: str) -> int:
     if len(instance) == 0:
         raise Exception(f"Middleware instance {name} not found, available names: {available_names}")
     instance = instance[0]
+    return instance
+
+
+async def get_middleware_instance_id(name: str) -> int:
+    instance = await get_middleware_instance(name)
     return instance.instance_id
 
 
@@ -297,5 +303,40 @@ async def remove_middleware_instance_nodes(id: int, node_ids: List[int]):
     response = await async_client.post(url, json={"nodes": node_ids})
     if response.status_code == 200:
         return response.json()
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+class MiddlewareInstanceChangeEvent(BaseModel):
+    event: str
+    result: str
+    status: str
+    create_time: str
+    update_time: str
+
+
+async def get_middleware_instance_change_events(middleware_type: int, id: int) -> List[MiddlewareInstanceChangeEvent]:
+    url = BACKEND_URL + f"/v1/middleware/management/state-machine/{middleware_type}/{id}/changes?page=1&pageSize=20"
+    response = await async_client.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        events: list = data["list"]
+        result = []
+        for event in events:
+            event_val = event["event"]["desc"]
+            result_val = event["result"]["desc"]
+            create_time = from_unix_mill_to_datetime(event["create_at"])
+            update_time = from_unix_mill_to_datetime(event["update_at"])
+            status = f"""from {event["from"]} to {event["to"]}"""
+            result.append(
+                MiddlewareInstanceChangeEvent(
+                    event=event_val,
+                    result=result_val,
+                    status=status,
+                    create_time=create_time,
+                    update_time=update_time,
+                )
+            )
+        return result
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
