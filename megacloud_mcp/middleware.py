@@ -292,3 +292,8 @@ async def get_middleware_instance_change_events(name: str):
     instance = await apis.get_middleware_instance(name)
     result = await apis.get_middleware_instance_change_events(instance.middleware_type, instance.instance_id)
     return result
+
+
+async def get_middleware_instance_alert_rules(name: str):
+    result = await apis.get_middleware_instance_alert_rules(name)
+    return result

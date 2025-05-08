@@ -340,3 +340,45 @@ async def get_middleware_instance_change_events(middleware_type: int, id: int) -
         return result
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+ALERTLEVELS = {
+    "1": "CLEAR",
+    "2": "INDETERMINATE",
+    "3": "CRITICAL",
+    "4": "MAJOR",
+    "5": "MINOR",
+    "6": "WARNING",
+}
+
+ALERTSTATUS = {
+    0: "Stopped",
+    1: "Running",
+}
+
+
+class AlertRule(BaseModel):
+    id: int
+    name: str
+    updated_at: str
+    description: str
+    resolved_description: str
+    rules: str
+    status: str
+    level: str
+
+
+async def get_middleware_instance_alert_rules(name: str) -> List[AlertRule]:
+    url = BACKEND_URL + f"/v1/monitor/event-rules?name=&zone=&domain=&service={name}&page_size=10"
+    response = await async_client.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        rules = []
+        for rule in data["data"]:
+            rule["level"] = ALERTLEVELS.get(rule["level"], "Unknown")
+            rule["status"] = ALERTSTATUS.get(rule["status"], "Unknown")
+            rule["updated_at"] = from_unix_mill_to_datetime(rule["updated_at"])
+            rules.append(AlertRule(**rule))
+        return rules
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
