@@ -28,6 +28,8 @@ class MegaCloudTools(str, Enum):
     RemoveMiddlewareInstanceNodes = "remove_middleware_instance_nodes"
     ListMiddlewareInstanceChangeEvents = "list_middleware_instance_change_events"
     ListMiddlewareInstanceAlertRules = "list_middleware_instance_alert_rules"
+    ListMiddlewareInstanceSupportLogTypes = "list_middleware_type_support_log_types"
+    ListMiddlewareInstanceLogs = "list_middleware_instance_logs"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -117,6 +119,16 @@ async def serve():
                 description="List all alert rules of a middleware instance.",
                 inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.ListMiddlewareInstanceSupportLogTypes,
+                description="List all support log types of a middleware instance.",
+                inputSchema=schema.MiddlewareTypeNameSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.ListMiddlewareInstanceLogs,
+                description="List logs of a middleware instance.",
+                inputSchema=schema.MiddlewareLogSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -201,6 +213,16 @@ async def serve():
             case MegaCloudTools.ListMiddlewareInstanceAlertRules:
                 arg = schema.MiddlewareNameSchema(**arguments)
                 resp = await middleware.get_middleware_instance_alert_rules(arg.middleware_instance_name)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListMiddlewareInstanceSupportLogTypes:
+                arg = schema.MiddlewareTypeNameSchema(**arguments)
+                resp = await apis.get_middleware_log_types(arg.middleware_type_name)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListMiddlewareInstanceLogs:
+                arg = schema.MiddlewareLogSchema(**arguments)
+                resp = await middleware.get_middleware_instance_logs(arg)
                 return utils.to_textcontent(resp)
 
             # redis

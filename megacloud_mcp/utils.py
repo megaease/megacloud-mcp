@@ -1,4 +1,5 @@
 import secrets
+import time
 from typing import Any, List
 from datetime import datetime
 from pydantic import BaseModel
@@ -39,3 +40,7 @@ def to_textcontent(model: Any) -> List[TextContent]:
 def from_unix_mill_to_datetime(unix_mill: int) -> str:
     dt = datetime.fromtimestamp(unix_mill / 1000.0)
     return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def current_millis() -> int:
+    return round(time.time() * 1000)

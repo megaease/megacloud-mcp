@@ -382,3 +382,109 @@ async def get_middleware_instance_alert_rules(name: str) -> List[AlertRule]:
         return rules
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+RESOURCETYPEMAP = {
+    1: "MySQL",
+    2: "ElasticSearch",
+    3: "Kibana",
+    4: "Redis",
+    5: "ZooKeeper",
+    6: "Kafka",
+    7: "MongoDB",
+    8: "Kubernetes",
+    9: "monitor-integration middleware",
+    10: "monitor-service only",
+    11: "Easegress",
+    13: "Docker App",
+    14: "Prometheus",
+    15: "Kubernetes App",
+    17: "Docker",
+    18: "EaseMesh",
+    19: "MinIO",
+    20: "Nginx",
+    21: "PostgreSQL",
+    102: "Cloudflared",
+}
+
+LOGMAP: Dict[str, List[str]] = {
+    "redis-log": ["main_log"],
+    "elasticsearch-log": [
+        "main_log",
+        "slowquery_log",
+        "slowindex_log",
+        "gc_log",
+    ],
+    "mysql-log": [
+        "general_log",
+        "slowquery_log",
+        "error_log",
+    ],
+    "kafka-log": ["server_log", "zookeeper_log"],
+    "zookeeper-log": ["server_log"],
+    "easegress-log": [
+        "main_log",
+        "admin_log",
+        "etcd_client_log",
+        "etcd_server_log",
+        "filter_http_access_log",
+        "filter_http_dump_log",
+    ],
+    "prometheus-log": ["main_log"],
+    "minio-log": ["minio_server_log", "minio_audit_log"],
+    "nginx-log": ["access_log", "error_log"],
+    "postgresql-log": ["postgresql_log"],
+}
+
+
+def get_log_kind_name(middleware_type: int) -> str:
+    try:
+        middleware_name = RESOURCETYPEMAP[middleware_type]
+        log_name = middleware_name.lower() + "-log"
+        assert log_name in LOGMAP
+        return log_name
+    except Exception as e:
+        raise Exception(f"Error: {e}, middleware_type: {middleware_type} not supported, available types: {RESOURCETYPEMAP.keys()}")
+
+
+async def get_middleware_log_types(type_name: str):
+    log_name = type_name.lower() + "-log"
+    if log_name in LOGMAP:
+        return LOGMAP[log_name]
+    else:
+        types = list(map(lambda x: x.removesuffix("-log"), LOGMAP.keys()))
+        raise Exception(f"Error: {type_name} not supported, available types: {types}")
+
+
+class MiddlewareInstanceLogs(BaseModel):
+    total_size: int
+    current_page: int
+    page_size: int
+    data: List[dict]
+
+
+async def get_middleware_instance_log(name: str, start: int, end: int, log_type: str, page: int) -> MiddlewareInstanceLogs:
+    instance = await get_middleware_instance(name)
+    log_kind = get_log_kind_name(instance.middleware_type)
+    if log_type not in LOGMAP[log_kind]:
+        raise Exception(f"Error: {log_type} not supported, available types: {LOGMAP[log_kind]}")
+    url = (
+        BACKEND_URL
+        + f"/v1/monitor/middleware-logs?start={start}&end={end}&service={name}&keyword=&hostIpv4=&current_page={page}&page_size=50&kind={log_kind}&log_type={log_type}&host_name=&node_name="
+    )
+    response = await async_client.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        log_data = []
+        for log in data["data"]:
+            log["log_time"] = from_unix_mill_to_datetime(int(log["log_time"]))
+            log_data.append(log)
+        logs = MiddlewareInstanceLogs(
+            total_size=data["total_size"],
+            current_page=data["current_page"],
+            page_size=data["page_size"],
+            data=log_data,
+        )
+        return logs
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")

@@ -32,3 +32,14 @@ class RemoveMiddlewareInstanceNodesSchema(BaseModel):
 
 class MiddlewareNameSchema(BaseModel):
     middleware_instance_name: str
+
+
+class MiddlewareTypeNameSchema(BaseModel):
+    middleware_type_name: str
+
+
+class MiddlewareLogSchema(BaseModel):
+    middleware_instance_name: str
+    log_type: str
+    time_interval_in_minutes: int = 30
+    current_page: int = 1

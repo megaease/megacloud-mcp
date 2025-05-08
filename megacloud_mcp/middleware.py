@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional
 from pydantic import BaseModel
+import time
 
 from megacloud_mcp import apis
 from megacloud_mcp import utils
@@ -296,4 +297,11 @@ async def get_middleware_instance_change_events(name: str):
 
 async def get_middleware_instance_alert_rules(name: str):
     result = await apis.get_middleware_instance_alert_rules(name)
+    return result
+
+
+async def get_middleware_instance_logs(arg: schema.MiddlewareLogSchema):
+    end_time = utils.current_millis()
+    start_time = end_time - arg.time_interval_in_minutes * 60 * 1000
+    result = await apis.get_middleware_instance_log(arg.middleware_instance_name, start_time, end_time, arg.log_type, arg.current_page)
     return result
