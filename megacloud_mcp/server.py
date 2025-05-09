@@ -35,6 +35,8 @@ class MegaCloudTools(str, Enum):
     ListHostNetErrInMonitorData = "list_host_net_err_in_monitor_data"
     ListHostDiskMonitorData = "list_host_disk_monitor_data"
     ListHostDiskInputOutputMonitorData = "list_host_disk_input_output_monitor_data"
+    ListHostNetBytesSentMonitorData = "list_host_net_bytes_sent_monitor_data"
+    ListHostNetBytesRecvMonitorData = "list_host_net_bytes_recv_monitor_data"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -159,6 +161,16 @@ async def serve():
                 description="List disk input output monitor data of given host",
                 inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.ListHostNetBytesSentMonitorData,
+                description="List net bytes sent monitor data of given host",
+                inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.ListHostNetBytesRecvMonitorData,
+                description="List net bytes recv monitor data of given host",
+                inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -278,6 +290,16 @@ async def serve():
             case MegaCloudTools.ListHostDiskInputOutputMonitorData:
                 arg = schema.HostNameTimeIntervalSchema(**arguments)
                 resp = await middleware.get_monitor_data_of_host_disk_input_output(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListHostNetBytesSentMonitorData:
+                arg = schema.HostNameTimeIntervalSchema(**arguments)
+                resp = await middleware.get_monitor_data_of_host_net_bytes_sent(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListHostNetBytesRecvMonitorData:
+                arg = schema.HostNameTimeIntervalSchema(**arguments)
+                resp = await middleware.get_monitor_data_of_host_net_bytes_recv(arg)
                 return utils.to_textcontent(resp)
 
             # redis

@@ -581,3 +581,23 @@ async def get_monitor_data_of_host_disk_input_output(tenant_id: int, host: str, 
         "metrics": [{"name": "serverinfo-diskio-read-bytes-ratio-metric"}, {"name": "serverinfo-diskio-write-bytes-ratio-metric"}],
     }
     return await get_monitor_data(tenant_id, d)
+
+
+async def get_monitor_data_of_host_net_bytes_sent(tenant_id: int, host: str, start: int, end: int):
+    d = {
+        "filters": [{"name": "host_name", "values": [host]}],
+        "start": start,
+        "end": end,
+        "metrics": [{"name": "serverinfo-net-bytes-sent-ratio-metric"}],
+    }
+    return await get_monitor_data(tenant_id, d)
+
+
+async def get_monitor_data_of_host_net_bytes_recv(tenant_id: int, host: str, start: int, end: int):
+    d = {
+        "filters": [{"name": "host_name", "values": [host]}],
+        "start": start,
+        "end": end,
+        "metrics": [{"name": "serverinfo-net-bytes-recv-ratio-metric"}],
+    }
+    return await get_monitor_data(tenant_id, d)
