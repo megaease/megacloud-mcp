@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List
+from typing import Any, Dict, List
 from pydantic import BaseModel
 
 from megacloud_mcp.settings import BACKEND_URL
@@ -516,8 +516,17 @@ async def get_tenant_id() -> int:
     return auth.tenant_id
 
 
-async def get_monitor_data_of_host_load(tenant_id: int, host: str, start: int, end: int) -> List[Dict]:
+async def get_monitor_data(tenant_id: int, data: dict) -> Any:
     url = BACKEND_URL + f"/v1/monitor/tenants/{tenant_id}/time-series"
+    response = await async_client.post(url, json=data)
+    if response.status_code == 200:
+        result = response.json()
+        return result
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def get_monitor_data_of_host_load(tenant_id: int, host: str, start: int, end: int) -> List[Dict]:
     d = {
         "filters": [{"name": "host_name", "values": [host]}],
         "start": start,
@@ -528,41 +537,47 @@ async def get_monitor_data_of_host_load(tenant_id: int, host: str, start: int, e
             {"name": "serverinfo-system-load15-avg-metric"},
         ],
     }
-    response = await async_client.post(url, json=d)
-    if response.status_code == 200:
-        result = response.json()
-        return result
-    else:
-        raise Exception(f"Error: {response.status_code} - {response.text}")
+    return await get_monitor_data(tenant_id, d)
 
 
-async def get_monitor_data_of_host_net_err_out(tenant_id: int, host: str, start: int, end: int) -> List[Dict]:
-    url = BACKEND_URL + f"/v1/monitor/tenants/{tenant_id}/time-series"
+async def get_monitor_data_of_host_net_err_out(tenant_id: int, host: str, start: int, end: int) -> Dict:
     d = {
         "filters": [{"name": "host_name", "values": [host]}],
         "start": start,
         "end": end,
         "metrics": [{"name": "serverinfo-net-err-out-ratio-metric"}],
     }
-    response = await async_client.post(url, json=d)
-    if response.status_code == 200:
-        result = response.json()
-        return result
-    else:
-        raise Exception(f"Error: {response.status_code} - {response.text}")
+    return await get_monitor_data(tenant_id, d)
 
 
-async def get_monitor_data_of_host_net_err_in(tenant_id: int, host: str, start: int, end: int) -> List[Dict]:
-    url = BACKEND_URL + f"/v1/monitor/tenants/{tenant_id}/time-series"
+async def get_monitor_data_of_host_net_err_in(tenant_id: int, host: str, start: int, end: int) -> Dict:
     d = {
         "filters": [{"name": "host_name", "values": [host]}],
         "start": start,
         "end": end,
         "metrics": [{"name": "serverinfo-net-err-in-ratio-metric"}],
     }
-    response = await async_client.post(url, json=d)
-    if response.status_code == 200:
-        result = response.json()
-        return result
-    else:
-        raise Exception(f"Error: {response.status_code} - {response.text}")
+    return await get_monitor_data(tenant_id, d)
+
+
+async def get_monitor_data_of_host_disk(tenant_id: int, host: str, start: int, end: int) -> Dict:
+    d = {
+        "filters": [{"name": "host_name", "values": [host]}],
+        "start": start,
+        "end": end,
+        "metrics": [
+            {"name": "serverinfo-disk-total-metric", "functions": [{"kind": "max"}], "groups": [{"by": "path.keyword"}]},
+            {"name": "serverinfo-disk-used-metric", "functions": [{"kind": "max"}], "groups": [{"by": "path.keyword"}]},
+        ],
+    }
+    return await get_monitor_data(tenant_id, d)
+
+
+async def get_monitor_data_of_host_disk_input_output(tenant_id: int, host: str, start: int, end: int):
+    d = {
+        "filters": [{"name": "host_name", "values": [host]}],
+        "start": start,
+        "end": end,
+        "metrics": [{"name": "serverinfo-diskio-read-bytes-ratio-metric"}, {"name": "serverinfo-diskio-write-bytes-ratio-metric"}],
+    }
+    return await get_monitor_data(tenant_id, d)

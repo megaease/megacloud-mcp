@@ -33,6 +33,8 @@ class MegaCloudTools(str, Enum):
     ListHostLoadMonitorData = "list_host_load_monitor_data"
     ListHostNetErrOutMonitorData = "list_host_net_err_out_monitor_data"
     ListHostNetErrInMonitorData = "list_host_net_err_in_monitor_data"
+    ListHostDiskMonitorData = "list_host_disk_monitor_data"
+    ListHostDiskInputOutputMonitorData = "list_host_disk_input_output_monitor_data"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -147,6 +149,16 @@ async def serve():
                 description="List net err in monitor data of given host",
                 inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.ListHostDiskMonitorData,
+                description="List disk monitor data of given host",
+                inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.ListHostDiskInputOutputMonitorData,
+                description="List disk input output monitor data of given host",
+                inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -256,6 +268,16 @@ async def serve():
             case MegaCloudTools.ListHostNetErrInMonitorData:
                 arg = schema.HostNameTimeIntervalSchema(**arguments)
                 resp = await middleware.get_monitor_data_of_host_net_err_in(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListHostDiskMonitorData:
+                arg = schema.HostNameTimeIntervalSchema(**arguments)
+                resp = await middleware.get_monitor_data_of_host_disk(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListHostDiskInputOutputMonitorData:
+                arg = schema.HostNameTimeIntervalSchema(**arguments)
+                resp = await middleware.get_monitor_data_of_host_disk_input_output(arg)
                 return utils.to_textcontent(resp)
 
             # redis
