@@ -601,3 +601,33 @@ async def get_monitor_data_of_host_net_bytes_recv(tenant_id: int, host: str, sta
         "metrics": [{"name": "serverinfo-net-bytes-recv-ratio-metric"}],
     }
     return await get_monitor_data(tenant_id, d)
+
+
+async def get_monitor_data_of_host_memory(tenant_id: int, host: str, start: int, end: int):
+    d = {
+        "filters": [{"name": "host_name", "values": [host]}],
+        "start": start,
+        "end": end,
+        "metrics": [
+            {"name": "serverinfo-mem-used-avg-metric"},
+            {"name": "serverinfo-mem-buffered-avg-metric"},
+            {"name": "serverinfo-mem-cached-avg-metric"},
+            {"name": "serverinfo-mem-free-avg-metric"},
+        ],
+    }
+    return await get_monitor_data(tenant_id, d)
+
+
+async def get_monitor_data_of_host_cpu(tenant_id: int, host: str, start: int, end: int):
+    d = {
+        "filters": [{"name": "host_name", "values": [host]}],
+        "start": start,
+        "end": end,
+        "metrics": [
+            {"name": "serverinfo-cpu-usage-system-avg-metric"},
+            {"name": "serverinfo-cpu-usage-user-avg-metric"},
+            {"name": "serverinfo-cpu-usage-iowait-avg-metric"},
+            {"name": "serverinfo-cpu-usage-idle-avg-metric"},
+        ],
+    }
+    return await get_monitor_data(tenant_id, d)

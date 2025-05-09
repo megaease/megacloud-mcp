@@ -37,6 +37,8 @@ class MegaCloudTools(str, Enum):
     ListHostDiskInputOutputMonitorData = "list_host_disk_input_output_monitor_data"
     ListHostNetBytesSentMonitorData = "list_host_net_bytes_sent_monitor_data"
     ListHostNetBytesRecvMonitorData = "list_host_net_bytes_recv_monitor_data"
+    ListHostMemoryMonitorData = "list_host_memory_monitor_data"
+    ListHostCpuMonitorData = "list_host_cpu_monitor_data"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -171,6 +173,16 @@ async def serve():
                 description="List net bytes recv monitor data of given host",
                 inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.ListHostMemoryMonitorData,
+                description="List memory monitor data of given host",
+                inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.ListHostCpuMonitorData,
+                description="List cpu monitor data of given host",
+                inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -300,6 +312,16 @@ async def serve():
             case MegaCloudTools.ListHostNetBytesRecvMonitorData:
                 arg = schema.HostNameTimeIntervalSchema(**arguments)
                 resp = await middleware.get_monitor_data_of_host_net_bytes_recv(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListHostMemoryMonitorData:
+                arg = schema.HostNameTimeIntervalSchema(**arguments)
+                resp = await middleware.get_monitor_data_of_host_memory(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListHostCpuMonitorData:
+                arg = schema.HostNameTimeIntervalSchema(**arguments)
+                resp = await middleware.get_monitor_data_of_host_cpu(arg)
                 return utils.to_textcontent(resp)
 
             # redis

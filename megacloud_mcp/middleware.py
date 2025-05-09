@@ -353,3 +353,17 @@ async def get_monitor_data_of_host_net_bytes_recv(arg: schema.HostNameTimeInterv
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
     result = await apis.get_monitor_data_of_host_net_bytes_recv(tenant_id, arg.host_name, start_time, end_time)
     return result
+
+
+async def get_monitor_data_of_host_memory(arg: schema.HostNameTimeIntervalSchema):
+    tenant_id = await apis.get_tenant_id()
+    start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
+    result = await apis.get_monitor_data_of_host_memory(tenant_id, arg.host_name, start_time, end_time)
+    return result
+
+
+async def get_monitor_data_of_host_cpu(arg: schema.HostNameTimeIntervalSchema):
+    tenant_id = await apis.get_tenant_id()
+    start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
+    result = await apis.get_monitor_data_of_host_cpu(tenant_id, arg.host_name, start_time, end_time)
+    return result
