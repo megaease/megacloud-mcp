@@ -31,6 +31,8 @@ class MegaCloudTools(str, Enum):
     ListMiddlewareInstanceSupportLogTypes = "list_middleware_type_support_log_types"
     ListMiddlewareInstanceLogs = "list_middleware_instance_logs"
     ListHostLoadMonitorData = "list_host_load_monitor_data"
+    ListHostNetErrOutMonitorData = "list_host_net_err_out_monitor_data"
+    ListHostNetErrInMonitorData = "list_host_net_err_in_monitor_data"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -135,6 +137,16 @@ async def serve():
                 description="List load monitor data of given host",
                 inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.ListHostNetErrOutMonitorData,
+                description="List net err out monitor data of given host",
+                inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.ListHostNetErrInMonitorData,
+                description="List net err in monitor data of given host",
+                inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -234,6 +246,16 @@ async def serve():
             case MegaCloudTools.ListHostLoadMonitorData:
                 arg = schema.HostNameTimeIntervalSchema(**arguments)
                 resp = await middleware.get_monitor_data_of_host_load(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListHostNetErrOutMonitorData:
+                arg = schema.HostNameTimeIntervalSchema(**arguments)
+                resp = await middleware.get_monitor_data_of_host_net_err_out(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListHostNetErrInMonitorData:
+                arg = schema.HostNameTimeIntervalSchema(**arguments)
+                resp = await middleware.get_monitor_data_of_host_net_err_in(arg)
                 return utils.to_textcontent(resp)
 
             # redis

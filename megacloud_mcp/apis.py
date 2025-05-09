@@ -534,3 +534,35 @@ async def get_monitor_data_of_host_load(tenant_id: int, host: str, start: int, e
         return result
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def get_monitor_data_of_host_net_err_out(tenant_id: int, host: str, start: int, end: int) -> List[Dict]:
+    url = BACKEND_URL + f"/v1/monitor/tenants/{tenant_id}/time-series"
+    d = {
+        "filters": [{"name": "host_name", "values": [host]}],
+        "start": start,
+        "end": end,
+        "metrics": [{"name": "serverinfo-net-err-out-ratio-metric"}],
+    }
+    response = await async_client.post(url, json=d)
+    if response.status_code == 200:
+        result = response.json()
+        return result
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def get_monitor_data_of_host_net_err_in(tenant_id: int, host: str, start: int, end: int) -> List[Dict]:
+    url = BACKEND_URL + f"/v1/monitor/tenants/{tenant_id}/time-series"
+    d = {
+        "filters": [{"name": "host_name", "values": [host]}],
+        "start": start,
+        "end": end,
+        "metrics": [{"name": "serverinfo-net-err-in-ratio-metric"}],
+    }
+    response = await async_client.post(url, json=d)
+    if response.status_code == 200:
+        result = response.json()
+        return result
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")

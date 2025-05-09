@@ -311,3 +311,17 @@ async def get_monitor_data_of_host_load(arg: schema.HostNameTimeIntervalSchema):
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
     result = await apis.get_monitor_data_of_host_load(tenant_id, arg.host_name, start_time, end_time)
     return result
+
+
+async def get_monitor_data_of_host_net_err_out(arg: schema.HostNameTimeIntervalSchema):
+    tenant_id = await apis.get_tenant_id()
+    start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
+    result = await apis.get_monitor_data_of_host_net_err_out(tenant_id, arg.host_name, start_time, end_time)
+    return result
+
+
+async def get_monitor_data_of_host_net_err_in(arg: schema.HostNameTimeIntervalSchema):
+    tenant_id = await apis.get_tenant_id()
+    start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
+    result = await apis.get_monitor_data_of_host_net_err_in(tenant_id, arg.host_name, start_time, end_time)
+    return result
