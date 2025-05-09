@@ -21,6 +21,14 @@ def to_textcontent(model: Any) -> List[TextContent]:
             )
             for item in model
         ]
+    elif isinstance(model, list):
+        return [
+            TextContent(
+                type="text",
+                text=f"{item}",
+            )
+            for item in model
+        ]
     elif isinstance(model, BaseModel):
         return [
             TextContent(
@@ -44,3 +52,9 @@ def from_unix_mill_to_datetime(unix_mill: int) -> str:
 
 def current_millis() -> int:
     return round(time.time() * 1000)
+
+
+def get_start_end_time(interval_in_mins: int):
+    end_time = current_millis()
+    start_time = end_time - interval_in_mins * 60 * 1000
+    return start_time, end_time

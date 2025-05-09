@@ -488,3 +488,49 @@ async def get_middleware_instance_log(name: str, start: int, end: int, log_type:
         return logs
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+class AuthorizationInfo(BaseModel):
+    username: str
+    tenant_id: int
+    tenant_name: str
+    privileges: list
+    role: list
+    role_set: list
+    permissions: list
+    resources: list
+
+
+async def get_authorizations() -> AuthorizationInfo:
+    url = BACKEND_URL + "/v1/control/my-authorizations"
+    response = await async_client.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        return AuthorizationInfo(**data)
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def get_tenant_id() -> int:
+    auth = await get_authorizations()
+    return auth.tenant_id
+
+
+async def get_monitor_data_of_host_load(tenant_id: int, host: str, start: int, end: int) -> List[Dict]:
+    url = BACKEND_URL + f"/v1/monitor/tenants/{tenant_id}/time-series"
+    d = {
+        "filters": [{"name": "host_name", "values": [host]}],
+        "start": start,
+        "end": end,
+        "metrics": [
+            {"name": "serverinfo-system-load1-avg-metric"},
+            {"name": "serverinfo-system-load5-avg-metric"},
+            {"name": "serverinfo-system-load15-avg-metric"},
+        ],
+    }
+    response = await async_client.post(url, json=d)
+    if response.status_code == 200:
+        result = response.json()
+        return result
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")

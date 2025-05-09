@@ -30,6 +30,7 @@ class MegaCloudTools(str, Enum):
     ListMiddlewareInstanceAlertRules = "list_middleware_instance_alert_rules"
     ListMiddlewareInstanceSupportLogTypes = "list_middleware_type_support_log_types"
     ListMiddlewareInstanceLogs = "list_middleware_instance_logs"
+    ListHostLoadMonitorData = "list_host_load_monitor_data"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -129,6 +130,11 @@ async def serve():
                 description="List logs of a middleware instance.",
                 inputSchema=schema.MiddlewareLogSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.ListHostLoadMonitorData,
+                description="List load monitor data of given host",
+                inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -223,6 +229,11 @@ async def serve():
             case MegaCloudTools.ListMiddlewareInstanceLogs:
                 arg = schema.MiddlewareLogSchema(**arguments)
                 resp = await middleware.get_middleware_instance_logs(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListHostLoadMonitorData:
+                arg = schema.HostNameTimeIntervalSchema(**arguments)
+                resp = await middleware.get_monitor_data_of_host_load(arg)
                 return utils.to_textcontent(resp)
 
             # redis

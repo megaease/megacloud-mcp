@@ -301,7 +301,13 @@ async def get_middleware_instance_alert_rules(name: str):
 
 
 async def get_middleware_instance_logs(arg: schema.MiddlewareLogSchema):
-    end_time = utils.current_millis()
-    start_time = end_time - arg.time_interval_in_minutes * 60 * 1000
+    start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
     result = await apis.get_middleware_instance_log(arg.middleware_instance_name, start_time, end_time, arg.log_type, arg.current_page)
+    return result
+
+
+async def get_monitor_data_of_host_load(arg: schema.HostNameTimeIntervalSchema):
+    tenant_id = await apis.get_tenant_id()
+    start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
+    result = await apis.get_monitor_data_of_host_load(tenant_id, arg.host_name, start_time, end_time)
     return result

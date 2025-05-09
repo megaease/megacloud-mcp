@@ -43,3 +43,8 @@ class MiddlewareLogSchema(BaseModel):
     log_type: str
     time_interval_in_minutes: int = 30
     current_page: int = 1
+
+
+class HostNameTimeIntervalSchema(BaseModel):
+    host_name: str
+    time_interval_in_minutes: int = 60
