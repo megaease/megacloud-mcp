@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel
 
 
@@ -48,3 +48,17 @@ class MiddlewareLogSchema(BaseModel):
 class HostNameTimeIntervalSchema(BaseModel):
     host_name: str
     time_interval_in_minutes: int = 60
+
+
+class CreateAlertRuleSchema(BaseModel):
+    name: str
+    description: str
+    resolved_description: str
+    middleware_instance_name: str
+    level: Literal["CLEAR", "INDETERMINATE", "CRITICAL", "MAJOR", "MINOR", "WARNING"]
+    alert_metric_happen_times: int = 1
+    alert_metric_happen_duration_in_seconds: int = 60
+    alert_metric_type: str
+    alert_metric_operator: Literal["eq", "neq", "lt", "lte", "gt", "gte"]
+    alert_metric_value: int
+

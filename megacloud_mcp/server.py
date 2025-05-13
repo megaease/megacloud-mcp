@@ -39,6 +39,8 @@ class MegaCloudTools(str, Enum):
     ListHostNetBytesRecvMonitorData = "list_host_net_bytes_recv_monitor_data"
     ListHostMemoryMonitorData = "list_host_memory_monitor_data"
     ListHostCpuMonitorData = "list_host_cpu_monitor_data"
+    ListMiddlewareAlertMetrics = "list_middleware_alert_metrics"
+    CreateMiddlewareAlertRule = "create_middleware_alert_rule"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -183,6 +185,16 @@ async def serve():
                 description="List cpu monitor data of given host",
                 inputSchema=schema.HostNameTimeIntervalSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.ListMiddlewareAlertMetrics,
+                description="List all alert metrics of a middleware instance that can be used to create alert rules.",
+                inputSchema=schema.MiddlewareTypeNameSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.CreateMiddlewareAlertRule,
+                description="Create an alert rule for a middleware instance.",
+                inputSchema=schema.CreateAlertRuleSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -322,6 +334,16 @@ async def serve():
             case MegaCloudTools.ListHostCpuMonitorData:
                 arg = schema.HostNameTimeIntervalSchema(**arguments)
                 resp = await middleware.get_monitor_data_of_host_cpu(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListMiddlewareAlertMetrics:
+                arg = schema.MiddlewareTypeNameSchema(**arguments)
+                resp = await apis.get_middleware_alert_metrics(arg.middleware_type_name)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.CreateMiddlewareAlertRule:
+                arg = schema.CreateAlertRuleSchema(**arguments)
+                resp = await middleware.create_middleware_alert_rule(arg)
                 return utils.to_textcontent(resp)
 
             # redis

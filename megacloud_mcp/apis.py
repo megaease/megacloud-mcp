@@ -351,6 +351,15 @@ ALERTLEVELS = {
     "6": "WARNING",
 }
 
+ALERTLEVELS_REVERSE = {
+    "CLEAR": "1",
+    "INDETERMINATE": "2",
+    "CRITICAL": "3",
+    "MAJOR": "4",
+    "MINOR": "5",
+    "WARNING": "6",
+}
+
 ALERTSTATUS = {
     0: "Stopped",
     1: "Running",
@@ -631,3 +640,65 @@ async def get_monitor_data_of_host_cpu(tenant_id: int, host: str, start: int, en
         ],
     }
     return await get_monitor_data(tenant_id, d)
+
+
+class MiddlewareAlertMetric(BaseModel):
+    name: str
+    desc: str
+
+
+async def get_middleware_alert_metrics(middleware_type_name: str) -> List[Dict]:
+    url = BACKEND_URL + f"/v1/monitor/dashboard-metric-trees?metric_type=origin&groups={middleware_type_name}"
+    response = await async_client.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        metrics = []
+        for m in data["root"][0]["children"][0]["children"][0]["children"]:
+            mm = MiddlewareAlertMetric(**m)
+            metrics.append(mm)
+        return metrics
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+class MiddlewareAlertRuleReq(BaseModel):
+    name: str
+    description: str
+    resolved_description: str
+    type: str = "0"
+    service: str
+    status: int = 0
+    schedule: str
+    level: str
+    rules: str
+
+
+async def make_alert_rule_schedule():
+    return [
+        {
+            "period_unit": "weekly",
+            "start_in_sec": "",
+            "end_in_sec": "",
+            "days": [],
+        }
+    ]
+
+
+def make_alert_rule_rule(count: int, duration: int, value: int, op: str, metric: str) -> dict:
+    return {
+        "type": "builder",
+        "count": count,
+        "duration": duration,
+        "predicate": {"value": value, "op": op},
+        "metric": metric,
+        "extensions": [],
+    }
+
+
+async def create_middleware_alert_rule(req: MiddlewareAlertRuleReq):
+    url = BACKEND_URL + "/v1/monitor/event-rules"
+    response = await async_client.post(url, json=req.model_dump())
+    if response.status_code == 201:
+        return response.json()
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")

@@ -1,6 +1,6 @@
+import json
 from typing import Dict, List, Optional
 from pydantic import BaseModel
-import time
 
 from megacloud_mcp import apis
 from megacloud_mcp import utils
@@ -367,3 +367,22 @@ async def get_monitor_data_of_host_cpu(arg: schema.HostNameTimeIntervalSchema):
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
     result = await apis.get_monitor_data_of_host_cpu(tenant_id, arg.host_name, start_time, end_time)
     return result
+
+
+async def create_middleware_alert_rule(arg: schema.CreateAlertRuleSchema):
+    schedule = json.dumps(apis.make_alert_rule_schedule())
+    rule = apis.make_alert_rule_rule(
+        arg.alert_metric_happen_times, arg.alert_metric_happen_duration_in_seconds, arg.alert_metric_value, arg.alert_metric_operator, arg.alert_metric_type
+    )
+    rule = json.dumps(rule)
+    req = apis.MiddlewareAlertRuleReq(
+        name=arg.name,
+        description=arg.description,
+        resolved_description=arg.resolved_description,
+        service=arg.middleware_instance_name,
+        level=apis.ALERTLEVELS_REVERSE[arg.level],
+        schedule=schedule,
+        rules=rule,
+    )
+    resp = await apis.create_middleware_alert_rule(req)
+    return resp
