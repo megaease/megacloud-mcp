@@ -41,6 +41,9 @@ class MegaCloudTools(str, Enum):
     ListHostCpuMonitorData = "list_host_cpu_monitor_data"
     ListMiddlewareAlertMetrics = "list_middleware_alert_metrics"
     CreateMiddlewareAlertRule = "create_middleware_alert_rule"
+    StartMiddlewareAlertRule = "start_middleware_alert_rule"
+    StopMiddlewareAlertRule = "stop_middleware_alert_rule"
+    DeleteMiddlewareAlertRule = "delete_middleware_alert_rule"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -195,6 +198,21 @@ async def serve():
                 description="Create an alert rule for a middleware instance.",
                 inputSchema=schema.CreateAlertRuleSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.StartMiddlewareAlertRule,
+                description="Start an alert rule for a middleware instance.",
+                inputSchema=schema.MiddlewareInstanceAlertRuleNameSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.StopMiddlewareAlertRule,
+                description="Stop an alert rule for a middleware instance.",
+                inputSchema=schema.MiddlewareInstanceAlertRuleNameSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.DeleteMiddlewareAlertRule,
+                description="Delete an alert rule for a middleware instance.",
+                inputSchema=schema.MiddlewareInstanceAlertRuleNameSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -344,6 +362,21 @@ async def serve():
             case MegaCloudTools.CreateMiddlewareAlertRule:
                 arg = schema.CreateAlertRuleSchema(**arguments)
                 resp = await middleware.create_middleware_alert_rule(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.StartMiddlewareAlertRule:
+                arg = schema.MiddlewareInstanceAlertRuleNameSchema(**arguments)
+                resp = await middleware.start_middleware_alert_rule(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.StopMiddlewareAlertRule:
+                arg = schema.MiddlewareInstanceAlertRuleNameSchema(**arguments)
+                resp = await middleware.stop_middleware_alert_rule(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.DeleteMiddlewareAlertRule:
+                arg = schema.MiddlewareInstanceAlertRuleNameSchema(**arguments)
+                resp = await middleware.delete_middleware_alert_rule(arg)
                 return utils.to_textcontent(resp)
 
             # redis

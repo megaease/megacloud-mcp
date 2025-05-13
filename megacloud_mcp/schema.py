@@ -62,3 +62,7 @@ class CreateAlertRuleSchema(BaseModel):
     alert_metric_operator: Literal["eq", "neq", "lt", "lte", "gt", "gte"]
     alert_metric_value: int
 
+
+class MiddlewareInstanceAlertRuleNameSchema(BaseModel):
+    middleware_instance_name: str
+    alert_rule_name: str

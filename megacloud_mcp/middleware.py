@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from megacloud_mcp import apis
 from megacloud_mcp import utils
 from megacloud_mcp import schema
+from megacloud_mcp.settings import BACKEND_URL
 
 REDIS_NAME = "Redis"
 
@@ -386,3 +387,34 @@ async def create_middleware_alert_rule(arg: schema.CreateAlertRuleSchema):
     )
     resp = await apis.create_middleware_alert_rule(req)
     return resp
+
+
+async def start_middleware_alert_rule(arg: schema.MiddlewareInstanceAlertRuleNameSchema):
+    rules = await apis.get_middleware_instance_alert_rule_json(arg.middleware_instance_name)
+    rule = list(filter(lambda x: x["name"] == arg.alert_rule_name, rules))
+    if len(rule) == 0:
+        raise Exception(f"Alert rule {arg.alert_rule_name} not found")
+    rule = rule[0]
+    rule["status"] = "1"
+    rule["updated_at"] = utils.current_millis()
+    return await apis.put_middleware_alert_rule(rule["id"], rule)
+
+
+async def stop_middleware_alert_rule(arg: schema.MiddlewareInstanceAlertRuleNameSchema):
+    rules = await apis.get_middleware_instance_alert_rule_json(arg.middleware_instance_name)
+    rule = list(filter(lambda x: x["name"] == arg.alert_rule_name, rules))
+    if len(rule) == 0:
+        raise Exception(f"Alert rule {arg.alert_rule_name} not found")
+    rule = rule[0]
+    rule["status"] = "0"
+    rule["updated_at"] = utils.current_millis()
+    return await apis.put_middleware_alert_rule(rule["id"], rule)
+
+
+async def delete_middleware_alert_rule(arg: schema.MiddlewareInstanceAlertRuleNameSchema):
+    rules = await apis.get_middleware_instance_alert_rule_json(arg.middleware_instance_name)
+    rule = list(filter(lambda x: x["name"] == arg.alert_rule_name, rules))
+    if len(rule) == 0:
+        raise Exception(f"Alert rule {arg.alert_rule_name} not found")
+    rule = rule[0]
+    return await apis.delete_middleware_alert_rule(rule["id"])

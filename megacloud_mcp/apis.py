@@ -377,20 +377,25 @@ class AlertRule(BaseModel):
     level: str
 
 
-async def get_middleware_instance_alert_rules(name: str) -> List[AlertRule]:
+async def get_middleware_instance_alert_rule_json(name: str) -> list[dict]:
     url = BACKEND_URL + f"/v1/monitor/event-rules?name=&zone=&domain=&service={name}&page_size=10"
     response = await async_client.get(url)
     if response.status_code == 200:
         data = response.json()
-        rules = []
-        for rule in data["data"]:
-            rule["level"] = ALERTLEVELS.get(rule["level"], "Unknown")
-            rule["status"] = ALERTSTATUS.get(rule["status"], "Unknown")
-            rule["updated_at"] = from_unix_mill_to_datetime(rule["updated_at"])
-            rules.append(AlertRule(**rule))
-        return rules
+        return data["data"]
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def get_middleware_instance_alert_rules(name: str) -> List[AlertRule]:
+    data = await get_middleware_instance_alert_rule_json(name)
+    rules = []
+    for rule in data:
+        rule["level"] = ALERTLEVELS.get(rule["level"], "Unknown")
+        rule["status"] = ALERTSTATUS.get(rule["status"], "Unknown")
+        rule["updated_at"] = from_unix_mill_to_datetime(rule["updated_at"])
+        rules.append(AlertRule(**rule))
+    return rules
 
 
 RESOURCETYPEMAP = {
@@ -699,6 +704,24 @@ async def create_middleware_alert_rule(req: MiddlewareAlertRuleReq):
     url = BACKEND_URL + "/v1/monitor/event-rules"
     response = await async_client.post(url, json=req.model_dump())
     if response.status_code == 201:
+        return response.json()
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def put_middleware_alert_rule(id: int, body: dict):
+    url = BACKEND_URL + f"/v1/monitor/event-rules/{id}"
+    response = await async_client.put(url, json=body)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Error: {response.status_code} - {response.text}")
+
+
+async def delete_middleware_alert_rule(id: int):
+    url = BACKEND_URL + f"/v1/monitor/event-rules/{id}"
+    response = await async_client.delete(url)
+    if response.status_code == 200:
         return response.json()
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
