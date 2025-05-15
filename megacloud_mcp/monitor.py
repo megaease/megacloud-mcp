@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List, Type
 from megacloud_mcp import apis
 
 
@@ -107,3 +107,36 @@ async def get_monitor_data_of_host_cpu(tenant_id: int, host: str, start: int, en
         ],
     }
     return await apis.get_monitor_data(tenant_id, d)
+
+
+class MiddlewareMonitorInterface:
+    @classmethod
+    def get_monitor_type(cls) -> list[str]:
+        raise NotImplementedError("get_monitor_type() must be implemented in subclasses")
+
+    @classmethod
+    def get_monitor_metrics(cls, monitor_type: str) -> Any:
+        raise NotImplementedError("get_monitor_metrics() must be implemented in subclasses")
+
+
+class PrometheusMonitor(MiddlewareMonitorInterface):
+    monitor_types = ["SamplesAppended"]
+    monitor_metrics = {"SamplesAppended": [{"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-head-samples-appended-total-metric"}]}
+
+    @classmethod
+    def get_monitor_type(cls) -> list[str]:
+        return cls.monitor_types
+
+
+MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
+    "prometheus": PrometheusMonitor,
+}
+
+
+async def get_middleware_monitor_metrics(middleware_instance_name: str) -> List[str]:
+    instance = await apis.get_middleware_instance(middleware_instance_name)
+    middleware_name = instance.middleware_name.lower()
+    if middleware_name not in MIDDLEWARE_MONITOR_MAP:
+        raise ValueError(f"Middleware {middleware_name} is not supported")
+    middleware_monitor = MIDDLEWARE_MONITOR_MAP[middleware_name]
+    return middleware_monitor.get_monitor_type()

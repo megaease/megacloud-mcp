@@ -11,6 +11,7 @@ from megacloud_mcp import utils
 from megacloud_mcp import schema
 from megacloud_mcp import middleware
 from megacloud_mcp.log import logger
+from megacloud_mcp import monitor
 
 
 class MegaCloudTools(str, Enum):
@@ -44,6 +45,7 @@ class MegaCloudTools(str, Enum):
     StartMiddlewareAlertRule = "start_middleware_alert_rule"
     StopMiddlewareAlertRule = "stop_middleware_alert_rule"
     DeleteMiddlewareAlertRule = "delete_middleware_alert_rule"
+    ListMiddlewareInstanceMonitorMetrics = "list_middleware_instance_monitor_metrics"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -213,6 +215,11 @@ async def serve():
                 description="Delete an alert rule for a middleware instance.",
                 inputSchema=schema.MiddlewareInstanceAlertRuleNameSchema.model_json_schema(),
             ),
+            Tool(
+                name=MegaCloudTools.ListMiddlewareInstanceMonitorMetrics,
+                description="List all monitor metrics of a middleware instance.",
+                inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
+            ),
             # redis
             Tool(
                 name=MegaCloudTools.CreateSingleRedisMiddleware,
@@ -377,6 +384,11 @@ async def serve():
             case MegaCloudTools.DeleteMiddlewareAlertRule:
                 arg = schema.MiddlewareInstanceAlertRuleNameSchema(**arguments)
                 resp = await middleware.delete_middleware_alert_rule(arg)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListMiddlewareInstanceMonitorMetrics:
+                arg = schema.MiddlewareNameSchema(**arguments)
+                resp = await monitor.get_middleware_monitor_metrics(arg.middleware_instance_name)
                 return utils.to_textcontent(resp)
 
             # redis
