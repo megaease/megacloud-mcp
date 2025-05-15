@@ -125,48 +125,85 @@ class MiddlewareMonitorInterface:
 
 class PrometheusMonitor(MiddlewareMonitorInterface):
     monitor_metrics = {
-        "SamplesAppended": [{"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-head-samples-appended-total-metric"}],
-        "MemoryProfile": [
+        "TSDBSamplesAppendedTotal": [{"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-head-samples-appended-total-metric"}],
+        "ProcessMemoryUsage": [
             {"functions": [{"kind": "max"}], "name": "prometheus-process-resident-memory-bytes-metric"},
             {"functions": [{"kind": "max"}], "name": "prometheus-process-virtual-memory-bytes-metric"},
         ],
-        "WALCorruptions": [{"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-wal-corruptions-total-metric"}],
-        "ActiveAppenders": [
+        "TSDBWALCorruptionTotal": [{"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-wal-corruptions-total-metric"}],
+        "ActiveTSDBAppendersAndFDs": [
             {"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-head-active-appenders-metric"},
             {"functions": [{"kind": "max"}], "name": "prometheus-process-open-fds-metric"},
         ],
-        "BlocksLoaded": [{"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-blocks-loaded-metric"}],
-        "HeadChunks": [{"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-head-chunks-metric"}],
-        "HeadBlockGCActivity": [
+        "TSDBBlocksLoaded": [{"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-blocks-loaded-metric"}],
+        "TSDBHeadChunks": [{"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-head-chunks-metric"}],
+        "TSDBHeadGCDuration": [
             {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-head-gc-duration-seconds-sum-metric"},
             {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-head-gc-duration-seconds-count-metric"},
         ],
-        "CompactionActivity": [
+        "TSDBCompactionStats": [
             {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-compactions-total-metric"},
             {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-compactions-failed-total-metric"},
             {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-compactions-triggered-total-metric"},
         ],
-        "ReloadCount": [{"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-reloads-total-metric"}],
-        "QueryDurations": [
+        "TSDBReloadsTotal": [{"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-reloads-total-metric"}],
+        "EngineQueryDurationRatios": [
             {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-engine-query-duration-seconds-sum-ratio-metric"},
             {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-engine-query-duration-seconds-count-ratio-metric"},
         ],
-        "RuleGroupEvalDuration": [
+        "RuleGroupEvaluationDuration": [
             {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-rule-group-duration-seconds-sum-metric"},
             {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-rule-group-duration-seconds-count-metric"},
         ],
-        "FailuresAndErrors": [
+        "ServiceDiscoveryAndCacheErrors": [
             {"name": "prometheus-prometheus-sd-consul-rpc-failures-total-ratio-metric"},
             {"name": "prometheus-prometheus-sd-dns-lookup-failures-total-ratio-metric"},
             {"name": "prometheus-prometheus-treecache-zookeeper-failures-total-ratio-metric"},
             {"name": "prometheus-prometheus-tsdb-head-series-not-found-total-ratio-metric"},
         ],
-        "SeriesHead": [
+        "TSDBHeadSeriesStats": [
             {"name": "prometheus-prometheus-tsdb-head-series-max-metric"},
             {"name": "prometheus-prometheus-tsdb-head-series-created-total-ratio-metric"},
             {"name": "prometheus-prometheus-tsdb-head-series-removed-total-ratio-metric"},
         ],
-        "TargetScrapePoolSync": [{"name": "prometheus-prometheus-target-scrape-pool-sync-total-ratio-metric"}],
+        "TargetScrapePoolSyncEvents": [{"name": "prometheus-prometheus-target-scrape-pool-sync-total-ratio-metric"}],
+    }
+
+
+class MySQLMonitor(MiddlewareMonitorInterface):
+    monitor_metrics = {
+        "SlowQueryRatio": [{"name": "mysql-slow-queries-ratio-metric"}],
+        "CommandTypeRatios": [
+            {"name": "mysql-com-insert-ratio-metric"},
+            {"name": "mysql-com-select-ratio-metric"},
+            {"name": "mysql-com-update-ratio-metric"},
+            {"name": "mysql-com-update-multi-ratio-metric"},
+            {"name": "mysql-com-delete-ratio-metric"},
+            {"name": "mysql-com-delete-multi-ratio-metric"},
+            {"name": "mysql-com-insert-select-ratio-metric"},
+            {"name": "mysql-com-replace-ratio-metric"},
+            {"name": "mysql-com-replace-select-ratio-metric"},
+            {"name": "mysql-com-commit-ratio-metric"},
+            {"name": "mysql-com-rollback-ratio-metric"},
+            {"name": "mysql-com-stmt-execute-ratio-metric"},
+            {"name": "mysql-com-call-procedure-ratio-metric"},
+        ],
+        "InnoDBRowOpsRatios": [
+            {"name": "mysql-innodb-rows-read-ratio-metric"},
+            {"name": "mysql-innodb-rows-deleted-ratio-metric"},
+            {"name": "mysql-innodb-rows-inserted-ratio-metric"},
+            {"name": "mysql-innodb-rows-updated-ratio-metric"},
+        ],
+        "InnoDBIOActivity": [{"name": "mysql-innodb-data-reads-ratio-metric"}, {"name": "mysql-innodb-data-writes-ratio-metric"}],
+        "AbortedAndLockedConnectionRatios": [{"name": "mysql-aborted-connects-ratio-metric"}, {"name": "mysql-locked-connects-ratio-metric"}],
+        "ThreadAndConnectionCounts": [{"name": "mysql-threads-running-sum-metric"}, {"name": "mysql-threads-connected-sum-metric"}],
+        "StorageUsageSummary": [
+            {"name": "mysql-table-schema-data-length-sum-metric"},
+            {"name": "mysql-table-schema-index-length-sum-metric"},
+            {"name": "mysql-binary-size-bytes-sum-metric"},
+        ],
+        "OSLogFsyncRatio": [{"name": "mysql-os-log-fsyncs-ratio-metric"}],
+        "NetworkThroughputRatios": [{"name": "mysql-bytes-received-ratio-metric"}, {"name": "mysql-bytes-sent-ratio-metric"}],
     }
 
 
