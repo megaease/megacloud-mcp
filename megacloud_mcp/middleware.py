@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from megacloud_mcp import apis
 from megacloud_mcp import utils
 from megacloud_mcp import schema
-from megacloud_mcp.settings import BACKEND_URL
+from megacloud_mcp import monitor
 
 REDIS_NAME = "Redis"
 
@@ -310,63 +310,63 @@ async def get_middleware_instance_logs(arg: schema.MiddlewareLogSchema):
 async def get_monitor_data_of_host_load(arg: schema.HostNameTimeIntervalSchema):
     tenant_id = await apis.get_tenant_id()
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
-    result = await apis.get_monitor_data_of_host_load(tenant_id, arg.host_name, start_time, end_time)
+    result = await monitor.get_monitor_data_of_host_load(tenant_id, arg.host_name, start_time, end_time)
     return result
 
 
 async def get_monitor_data_of_host_net_err_out(arg: schema.HostNameTimeIntervalSchema):
     tenant_id = await apis.get_tenant_id()
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
-    result = await apis.get_monitor_data_of_host_net_err_out(tenant_id, arg.host_name, start_time, end_time)
+    result = await monitor.get_monitor_data_of_host_net_err_out(tenant_id, arg.host_name, start_time, end_time)
     return result
 
 
 async def get_monitor_data_of_host_net_err_in(arg: schema.HostNameTimeIntervalSchema):
     tenant_id = await apis.get_tenant_id()
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
-    result = await apis.get_monitor_data_of_host_net_err_in(tenant_id, arg.host_name, start_time, end_time)
+    result = await monitor.get_monitor_data_of_host_net_err_in(tenant_id, arg.host_name, start_time, end_time)
     return result
 
 
 async def get_monitor_data_of_host_disk(arg: schema.HostNameTimeIntervalSchema):
     tenant_id = await apis.get_tenant_id()
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
-    result = await apis.get_monitor_data_of_host_disk(tenant_id, arg.host_name, start_time, end_time)
+    result = await monitor.get_monitor_data_of_host_disk(tenant_id, arg.host_name, start_time, end_time)
     return result
 
 
 async def get_monitor_data_of_host_disk_input_output(arg: schema.HostNameTimeIntervalSchema):
     tenant_id = await apis.get_tenant_id()
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
-    result = await apis.get_monitor_data_of_host_disk_input_output(tenant_id, arg.host_name, start_time, end_time)
+    result = await monitor.get_monitor_data_of_host_disk_input_output(tenant_id, arg.host_name, start_time, end_time)
     return result
 
 
 async def get_monitor_data_of_host_net_bytes_sent(arg: schema.HostNameTimeIntervalSchema):
     tenant_id = await apis.get_tenant_id()
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
-    result = await apis.get_monitor_data_of_host_net_bytes_sent(tenant_id, arg.host_name, start_time, end_time)
+    result = await monitor.get_monitor_data_of_host_net_bytes_sent(tenant_id, arg.host_name, start_time, end_time)
     return result
 
 
 async def get_monitor_data_of_host_net_bytes_recv(arg: schema.HostNameTimeIntervalSchema):
     tenant_id = await apis.get_tenant_id()
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
-    result = await apis.get_monitor_data_of_host_net_bytes_recv(tenant_id, arg.host_name, start_time, end_time)
+    result = await monitor.get_monitor_data_of_host_net_bytes_recv(tenant_id, arg.host_name, start_time, end_time)
     return result
 
 
 async def get_monitor_data_of_host_memory(arg: schema.HostNameTimeIntervalSchema):
     tenant_id = await apis.get_tenant_id()
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
-    result = await apis.get_monitor_data_of_host_memory(tenant_id, arg.host_name, start_time, end_time)
+    result = await monitor.get_monitor_data_of_host_memory(tenant_id, arg.host_name, start_time, end_time)
     return result
 
 
 async def get_monitor_data_of_host_cpu(arg: schema.HostNameTimeIntervalSchema):
     tenant_id = await apis.get_tenant_id()
     start_time, end_time = utils.get_start_end_time(arg.time_interval_in_minutes)
-    result = await apis.get_monitor_data_of_host_cpu(tenant_id, arg.host_name, start_time, end_time)
+    result = await monitor.get_monitor_data_of_host_cpu(tenant_id, arg.host_name, start_time, end_time)
     return result
 
 

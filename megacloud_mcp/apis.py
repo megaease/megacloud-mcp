@@ -141,24 +141,24 @@ async def list_available_middleware_type() -> List[MiddlewareType]:
         raise Exception(f"Error: {response.status_code} - {response.text}")
 
 
-MIDDLEWARE_TYPE2NAME: Dict[int, str] = {}
-MIDDLEWARE_NAME2TYPE: Dict[str, int] = {}
+_MIDDLEWARE_TYPE2NAME: Dict[int, str] = {}
+_MIDDLEWARE_NAME2TYPE: Dict[str, int] = {}
 
 
 async def get_middleware_name(middleware_type: int) -> str:
-    if len(MIDDLEWARE_TYPE2NAME) == 0:
+    if len(_MIDDLEWARE_TYPE2NAME) == 0:
         middleware_types = await list_available_middleware_type()
         for middleware in middleware_types:
-            MIDDLEWARE_TYPE2NAME[middleware.middleware_type] = middleware.name
-    return MIDDLEWARE_TYPE2NAME.get(middleware_type, "Unknown")
+            _MIDDLEWARE_TYPE2NAME[middleware.middleware_type] = middleware.name
+    return _MIDDLEWARE_TYPE2NAME.get(middleware_type, "Unknown")
 
 
 async def get_middleware_type(middleware_name: str) -> int:
-    if len(MIDDLEWARE_NAME2TYPE) == 0:
+    if len(_MIDDLEWARE_NAME2TYPE) == 0:
         middleware_types = await list_available_middleware_type()
         for middleware in middleware_types:
-            MIDDLEWARE_NAME2TYPE[middleware.name.lower()] = middleware.middleware_type
-    return MIDDLEWARE_NAME2TYPE.get(middleware_name.lower(), -1)
+            _MIDDLEWARE_NAME2TYPE[middleware.name.lower()] = middleware.middleware_type
+    return _MIDDLEWARE_NAME2TYPE.get(middleware_name.lower(), -1)
 
 
 class MiddlewareInstance(BaseModel):
@@ -351,14 +351,7 @@ ALERTLEVELS = {
     "6": "WARNING",
 }
 
-ALERTLEVELS_REVERSE = {
-    "CLEAR": "1",
-    "INDETERMINATE": "2",
-    "CRITICAL": "3",
-    "MAJOR": "4",
-    "MINOR": "5",
-    "WARNING": "6",
-}
+ALERTLEVELS_REVERSE = {v: k for k, v in ALERTLEVELS.items()}
 
 ALERTSTATUS = {
     0: "Stopped",
@@ -538,113 +531,6 @@ async def get_monitor_data(tenant_id: int, data: dict) -> Any:
         return result
     else:
         raise Exception(f"Error: {response.status_code} - {response.text}")
-
-
-async def get_monitor_data_of_host_load(tenant_id: int, host: str, start: int, end: int) -> List[Dict]:
-    d = {
-        "filters": [{"name": "host_name", "values": [host]}],
-        "start": start,
-        "end": end,
-        "metrics": [
-            {"name": "serverinfo-system-load1-avg-metric"},
-            {"name": "serverinfo-system-load5-avg-metric"},
-            {"name": "serverinfo-system-load15-avg-metric"},
-        ],
-    }
-    return await get_monitor_data(tenant_id, d)
-
-
-async def get_monitor_data_of_host_net_err_out(tenant_id: int, host: str, start: int, end: int) -> Dict:
-    d = {
-        "filters": [{"name": "host_name", "values": [host]}],
-        "start": start,
-        "end": end,
-        "metrics": [{"name": "serverinfo-net-err-out-ratio-metric"}],
-    }
-    return await get_monitor_data(tenant_id, d)
-
-
-async def get_monitor_data_of_host_net_err_in(tenant_id: int, host: str, start: int, end: int) -> Dict:
-    d = {
-        "filters": [{"name": "host_name", "values": [host]}],
-        "start": start,
-        "end": end,
-        "metrics": [{"name": "serverinfo-net-err-in-ratio-metric"}],
-    }
-    return await get_monitor_data(tenant_id, d)
-
-
-async def get_monitor_data_of_host_disk(tenant_id: int, host: str, start: int, end: int) -> Dict:
-    d = {
-        "filters": [{"name": "host_name", "values": [host]}],
-        "start": start,
-        "end": end,
-        "metrics": [
-            {"name": "serverinfo-disk-total-metric", "functions": [{"kind": "max"}], "groups": [{"by": "path.keyword"}]},
-            {"name": "serverinfo-disk-used-metric", "functions": [{"kind": "max"}], "groups": [{"by": "path.keyword"}]},
-        ],
-    }
-    return await get_monitor_data(tenant_id, d)
-
-
-async def get_monitor_data_of_host_disk_input_output(tenant_id: int, host: str, start: int, end: int):
-    d = {
-        "filters": [{"name": "host_name", "values": [host]}],
-        "start": start,
-        "end": end,
-        "metrics": [{"name": "serverinfo-diskio-read-bytes-ratio-metric"}, {"name": "serverinfo-diskio-write-bytes-ratio-metric"}],
-    }
-    return await get_monitor_data(tenant_id, d)
-
-
-async def get_monitor_data_of_host_net_bytes_sent(tenant_id: int, host: str, start: int, end: int):
-    d = {
-        "filters": [{"name": "host_name", "values": [host]}],
-        "start": start,
-        "end": end,
-        "metrics": [{"name": "serverinfo-net-bytes-sent-ratio-metric"}],
-    }
-    return await get_monitor_data(tenant_id, d)
-
-
-async def get_monitor_data_of_host_net_bytes_recv(tenant_id: int, host: str, start: int, end: int):
-    d = {
-        "filters": [{"name": "host_name", "values": [host]}],
-        "start": start,
-        "end": end,
-        "metrics": [{"name": "serverinfo-net-bytes-recv-ratio-metric"}],
-    }
-    return await get_monitor_data(tenant_id, d)
-
-
-async def get_monitor_data_of_host_memory(tenant_id: int, host: str, start: int, end: int):
-    d = {
-        "filters": [{"name": "host_name", "values": [host]}],
-        "start": start,
-        "end": end,
-        "metrics": [
-            {"name": "serverinfo-mem-used-avg-metric"},
-            {"name": "serverinfo-mem-buffered-avg-metric"},
-            {"name": "serverinfo-mem-cached-avg-metric"},
-            {"name": "serverinfo-mem-free-avg-metric"},
-        ],
-    }
-    return await get_monitor_data(tenant_id, d)
-
-
-async def get_monitor_data_of_host_cpu(tenant_id: int, host: str, start: int, end: int):
-    d = {
-        "filters": [{"name": "host_name", "values": [host]}],
-        "start": start,
-        "end": end,
-        "metrics": [
-            {"name": "serverinfo-cpu-usage-system-avg-metric"},
-            {"name": "serverinfo-cpu-usage-user-avg-metric"},
-            {"name": "serverinfo-cpu-usage-iowait-avg-metric"},
-            {"name": "serverinfo-cpu-usage-idle-avg-metric"},
-        ],
-    }
-    return await get_monitor_data(tenant_id, d)
 
 
 class MiddlewareAlertMetric(BaseModel):
