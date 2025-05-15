@@ -66,3 +66,10 @@ class CreateAlertRuleSchema(BaseModel):
 class MiddlewareInstanceAlertRuleNameSchema(BaseModel):
     middleware_instance_name: str
     alert_rule_name: str
+
+
+class MiddlewareInstanceMonitorDataSchema(BaseModel):
+    middleware_instance_name: str
+    node_name: str
+    metric_name: str
+    time_interval_in_minutes: int = 60

@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Type
-from megacloud_mcp import apis
+from megacloud_mcp import apis, schema, utils
 
 
 async def get_monitor_data_of_host_load(tenant_id: int, host: str, start: int, end: int) -> List[Dict]:
@@ -110,22 +110,64 @@ async def get_monitor_data_of_host_cpu(tenant_id: int, host: str, start: int, en
 
 
 class MiddlewareMonitorInterface:
+    monitor_metrics: Dict[str, Any] = {}
+
     @classmethod
     def get_monitor_type(cls) -> list[str]:
-        raise NotImplementedError("get_monitor_type() must be implemented in subclasses")
+        return list(cls.monitor_metrics.keys())
 
     @classmethod
     def get_monitor_metrics(cls, monitor_type: str) -> Any:
-        raise NotImplementedError("get_monitor_metrics() must be implemented in subclasses")
+        if monitor_type not in cls.monitor_metrics:
+            raise ValueError(f"Monitor type {monitor_type} is not supported")
+        return cls.monitor_metrics[monitor_type]
 
 
 class PrometheusMonitor(MiddlewareMonitorInterface):
-    monitor_types = ["SamplesAppended"]
-    monitor_metrics = {"SamplesAppended": [{"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-head-samples-appended-total-metric"}]}
-
-    @classmethod
-    def get_monitor_type(cls) -> list[str]:
-        return cls.monitor_types
+    monitor_metrics = {
+        "SamplesAppended": [{"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-head-samples-appended-total-metric"}],
+        "MemoryProfile": [
+            {"functions": [{"kind": "max"}], "name": "prometheus-process-resident-memory-bytes-metric"},
+            {"functions": [{"kind": "max"}], "name": "prometheus-process-virtual-memory-bytes-metric"},
+        ],
+        "WALCorruptions": [{"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-wal-corruptions-total-metric"}],
+        "ActiveAppenders": [
+            {"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-head-active-appenders-metric"},
+            {"functions": [{"kind": "max"}], "name": "prometheus-process-open-fds-metric"},
+        ],
+        "BlocksLoaded": [{"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-blocks-loaded-metric"}],
+        "HeadChunks": [{"functions": [{"kind": "max"}], "name": "prometheus-prometheus-tsdb-head-chunks-metric"}],
+        "HeadBlockGCActivity": [
+            {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-head-gc-duration-seconds-sum-metric"},
+            {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-head-gc-duration-seconds-count-metric"},
+        ],
+        "CompactionActivity": [
+            {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-compactions-total-metric"},
+            {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-compactions-failed-total-metric"},
+            {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-compactions-triggered-total-metric"},
+        ],
+        "ReloadCount": [{"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-tsdb-reloads-total-metric"}],
+        "QueryDurations": [
+            {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-engine-query-duration-seconds-sum-ratio-metric"},
+            {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-engine-query-duration-seconds-count-ratio-metric"},
+        ],
+        "RuleGroupEvalDuration": [
+            {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-rule-group-duration-seconds-sum-metric"},
+            {"functions": [{"kind": "increment"}], "name": "prometheus-prometheus-rule-group-duration-seconds-count-metric"},
+        ],
+        "FailuresAndErrors": [
+            {"name": "prometheus-prometheus-sd-consul-rpc-failures-total-ratio-metric"},
+            {"name": "prometheus-prometheus-sd-dns-lookup-failures-total-ratio-metric"},
+            {"name": "prometheus-prometheus-treecache-zookeeper-failures-total-ratio-metric"},
+            {"name": "prometheus-prometheus-tsdb-head-series-not-found-total-ratio-metric"},
+        ],
+        "SeriesHead": [
+            {"name": "prometheus-prometheus-tsdb-head-series-max-metric"},
+            {"name": "prometheus-prometheus-tsdb-head-series-created-total-ratio-metric"},
+            {"name": "prometheus-prometheus-tsdb-head-series-removed-total-ratio-metric"},
+        ],
+        "TargetScrapePoolSync": [{"name": "prometheus-prometheus-target-scrape-pool-sync-total-ratio-metric"}],
+    }
 
 
 MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
@@ -140,3 +182,24 @@ async def get_middleware_monitor_metrics(middleware_instance_name: str) -> List[
         raise ValueError(f"Middleware {middleware_name} is not supported")
     middleware_monitor = MIDDLEWARE_MONITOR_MAP[middleware_name]
     return middleware_monitor.get_monitor_type()
+
+
+async def get_monitor_metrics(middleware_instance_name: str, monitor_type: str) -> Any:
+    instance = await apis.get_middleware_instance(middleware_instance_name)
+    middleware_name = instance.middleware_name.lower()
+    if middleware_name not in MIDDLEWARE_MONITOR_MAP:
+        raise ValueError(f"Middleware {middleware_name} is not supported")
+    middleware_monitor = MIDDLEWARE_MONITOR_MAP[middleware_name]
+    return middleware_monitor.get_monitor_metrics(monitor_type)
+
+
+async def get_middleware_monitor_data(arg: schema.MiddlewareInstanceMonitorDataSchema) -> Dict:
+    tenant_id = await apis.get_tenant_id()
+    start, end = utils.get_start_end_time(arg.time_interval_in_minutes)
+    d = {
+        "filters": [{"name": "service", "values": [arg.middleware_instance_name]}, {"name": "node_name", "values": [arg.node_name]}],
+        "start": start,
+        "end": end,
+        "metrics": await get_monitor_metrics(arg.middleware_instance_name, arg.metric_name),
+    }
+    return await apis.get_monitor_data(tenant_id, d)

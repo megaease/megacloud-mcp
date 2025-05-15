@@ -45,7 +45,8 @@ class MegaCloudTools(str, Enum):
     StartMiddlewareAlertRule = "start_middleware_alert_rule"
     StopMiddlewareAlertRule = "stop_middleware_alert_rule"
     DeleteMiddlewareAlertRule = "delete_middleware_alert_rule"
-    ListMiddlewareInstanceMonitorMetrics = "list_middleware_instance_monitor_metrics"
+    ListMiddlewareInstanceMonitorMetricTypes = "list_middleware_instance_monitor_metric_types"
+    ListMiddlewareInstanceMonitorData = "list_middleware_instance_monitor_data"
 
     # redis
     CreateSingleRedisMiddleware = "create_single_redis_middleware"
@@ -216,9 +217,14 @@ async def serve():
                 inputSchema=schema.MiddlewareInstanceAlertRuleNameSchema.model_json_schema(),
             ),
             Tool(
-                name=MegaCloudTools.ListMiddlewareInstanceMonitorMetrics,
-                description="List all monitor metrics of a middleware instance.",
+                name=MegaCloudTools.ListMiddlewareInstanceMonitorMetricTypes,
+                description="List all monitor metric types of a middleware instance, used to list monitor data.",
                 inputSchema=schema.MiddlewareNameSchema.model_json_schema(),
+            ),
+            Tool(
+                name=MegaCloudTools.ListMiddlewareInstanceMonitorData,
+                description="List monitor data of a middleware instance.",
+                inputSchema=schema.MiddlewareInstanceMonitorDataSchema.model_json_schema(),
             ),
             # redis
             Tool(
@@ -386,9 +392,14 @@ async def serve():
                 resp = await middleware.delete_middleware_alert_rule(arg)
                 return utils.to_textcontent(resp)
 
-            case MegaCloudTools.ListMiddlewareInstanceMonitorMetrics:
+            case MegaCloudTools.ListMiddlewareInstanceMonitorMetricTypes:
                 arg = schema.MiddlewareNameSchema(**arguments)
                 resp = await monitor.get_middleware_monitor_metrics(arg.middleware_instance_name)
+                return utils.to_textcontent(resp)
+
+            case MegaCloudTools.ListMiddlewareInstanceMonitorData:
+                arg = schema.MiddlewareInstanceMonitorDataSchema(**arguments)
+                resp = await monitor.get_middleware_monitor_data(arg)
                 return utils.to_textcontent(resp)
 
             # redis
