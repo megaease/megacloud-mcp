@@ -207,8 +207,48 @@ class MySQLMonitor(MiddlewareMonitorInterface):
     }
 
 
+class KafkaMonitor(MiddlewareMonitorInterface):
+    monitor_metrics = {
+        "TopicPartitionOffsetRatio": [{"name": "kafka-topic-offset-offset-ratio-metric"}],
+        "ConsumerGroupMaxLag": [{"name": "kafka-group-topic-total-lag-max-by-group-metric"}],
+        "ConsumerGroupMaxPartitionCount": [{"name": "kafka-group-topic-partition-count-max-by-group-metric"}],
+        "TopicMessagesInPerSec1m": [{"name": "kafka-topics-messagesinpersec-oneminuterate-max-metric"}],
+        "TopicBytesInPerSec1m": [{"name": "kafka-topics-bytesinpersec-oneminuterate-max-metric"}],
+        "TopicBytesOutPerSec1m": [{"name": "kafka-topics-bytesoutpersec-oneminuterate-max-metric"}],
+        "HostProduceRequestsPerSecRatio": [
+            {"name": "kafka-topics-totalproducerequestspersec-count-ratio-metric", "groups": [{"by": "host_name"}]},
+            {"name": "kafka-topics-failedproducerequestspersec-count-ratio-metric", "groups": [{"by": "host_name"}]},
+        ],
+        "HostProduceMessageConversionsPerSecRatio": [
+            {"name": "kafka-topics-producemessageconversionspersec-count-ratio-metric", "groups": [{"by": "host_name"}]}
+        ],
+        "UnderReplicatedPartitions": [{"name": "kafka-replica-manager-underreplicatedpartitions-value-max-metric"}],
+        "OfflineReplicaCount": [{"name": "kafka-replica-manager-offlinereplicacount-value-max-metric"}],
+        "LeaderCount": [{"name": "kafka-replica-manager-leadercount-value-max-metric"}],
+        "PartitionCount": [{"name": "kafka-replica-manager-partitioncount-value-max-metric"}],
+        "ControllerLeaderElectionRateAndTimeMs": [{"name": "kafka-controller-leaderelectionrateandtimems-max-max-metric"}],
+        "UncleanLeaderElectionsPerSec": [{"name": "kafka-controller-uncleanleaderelectionspersec-oneminuterate-max-metric"}],
+        "ActiveControllerCount": [{"name": "kafka-controller-activecontrollercount-value-max-metric"}],
+        "GlobalTopicCount": [{"name": "kafka-controller-globaltopiccount-value-max-metric"}],
+        "GlobalPartitionCount": [{"name": "kafka-controller-globalpartitioncount-value-max-metric"}],
+        "JavaCpuUseParSecond": [
+            {"name": "kafka-process-cpu-seconds-total-ratio-metric", "groups": [{"by": "devicename"}], "functions": [{"kind": "increment"}]}
+        ],
+        "JavaMemoryPool": [{"name": "kafka-java-memory-pool-usage-used-max-by-tag-name-metric"}],
+        "JavaThreadPool": [
+            {"name": "kafka-java-threading-daemonthreadcount-max-metric"},
+            {"name": "kafka-java-threading-threadcount-max-metric"},
+            {"name": "kafka-java-threading-peakthreadcount-max-metric"},
+        ],
+        "JavaGCCount": [{"name": "kafka-java-garbage-collector-collectioncount-ratio-metric"}],
+        "JavaGCTime": [{"name": "kafka-java-garbage-collector-collectiontime-ratio-metric"}],
+    }
+
+
 MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "prometheus": PrometheusMonitor,
+    "mysql": MySQLMonitor,
+    "kafka": KafkaMonitor,
 }
 
 
