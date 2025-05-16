@@ -274,11 +274,50 @@ class RedisMonitor(MiddlewareMonitorInterface):
     }
 
 
+class NginxMonitor(MiddlewareMonitorInterface):
+    monitor_metrics = {
+        "ConnectionStates": [
+            {"name": "nginx-vts-connections-reading-metric"},
+            {"name": "nginx-vts-connections-writing-metric"},
+            {"name": "nginx-vts-connections-waiting-metric"},
+            {"name": "nginx-vts-connections-active-metric"},
+        ],
+        "ResponseStatusRatios": [
+            {"name": "nginx-vts-server-response-2xx-count-ratio-metric"},
+            {"name": "nginx-vts-server-response-4xx-count-ratio-metric"},
+            {"name": "nginx-vts-server-response-5xx-count-ratio-metric"},
+        ],
+        "RequestStats": [
+            {"name": "nginx-vts-server-request-time-ratio-metric"},
+            {"name": "nginx-vts-server-requests-ratio-metric"},
+        ],
+        "ServerTraffic": [
+            {"name": "nginx-vts-server-in-bytes-ratio-metric"},
+            {"name": "nginx-vts-server-out-bytes-ratio-metric"},
+        ],
+        "UpstreamTraffic": [
+            {"name": "nginx-vts-upstream-in-bytes-ratio-metric"},
+            {"name": "nginx-vts-upstream-out-bytes-ratio-metric"},
+        ],
+        "CacheStats": [
+            {"name": "nginx-vts-server-cache-bypass-sum-metric"},
+            {"name": "nginx-vts-server-cache-expired-sum-metric"},
+            {"name": "nginx-vts-server-cache-hit-sum-metric"},
+            {"name": "nginx-vts-server-cache-miss-sum-metric"},
+            {"name": "nginx-vts-server-cache-revalidated-sum-metric"},
+            {"name": "nginx-vts-server-cache-scarce-sum-metric"},
+            {"name": "nginx-vts-server-cache-stale-sum-metric"},
+            {"name": "nginx-vts-server-cache-updating-sum-metric"},
+        ],
+    }
+
+
 MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "prometheus": PrometheusMonitor,
     "mysql": MySQLMonitor,
     "kafka": KafkaMonitor,
     "redis": RedisMonitor,
+    "nginx": NginxMonitor,
 }
 
 
