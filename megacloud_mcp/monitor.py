@@ -245,10 +245,40 @@ class KafkaMonitor(MiddlewareMonitorInterface):
     }
 
 
+class RedisMonitor(MiddlewareMonitorInterface):
+    monitor_metrics = {
+        "KeyspaceKeys": [{"name": "redis-keyspace-keys-metric", "groups": [{"by": "database.keyword"}], "functions": [{"kind": "max"}]}],
+        "MemoryUsage": [
+            {"name": "redis-used-memory-metric", "functions": [{"kind": "max"}]},
+            {"name": "redis-used-memory-rss-metric", "functions": [{"kind": "max"}]},
+        ],
+        "KeyspaceHitsMisses": [
+            {"name": "redis-keyspace-hits-metric", "functions": [{"kind": "increment"}]},
+            {"name": "redis-keyspace-misses-metric", "functions": [{"kind": "increment"}]},
+        ],
+        "KeysEvictedExpired": [
+            {"name": "redis-evicted-keys-metric", "functions": [{"kind": "increment"}]},
+            {"name": "redis-expired-keys-metric", "functions": [{"kind": "increment"}]},
+        ],
+        "ClientConnections": [
+            {"name": "redis-clients-metric", "functions": [{"kind": "max"}]},
+            {"name": "redis-blocked-clients-metric", "functions": [{"kind": "max"}]},
+        ],
+        "InstantaneousOpsPerSec": [{"name": "redis-instantaneous-ops-per-sec-metric", "functions": [{"kind": "max"}, {"kind": "min"}, {"kind": "avg"}]}],
+        "KeyspaceHitRate": [{"name": "redis-keyspace-hitrate-metric", "functions": [{"kind": "min"}]}],
+        "MemoryFragmentationRatio": [{"name": "redis-mem-fragmentation-ratio-metric", "functions": [{"kind": "min"}]}],
+        "TotalCommandsProcessed": [{"name": "redis-total-commands-processed-metric", "functions": [{"kind": "increment"}]}],
+        "ConnectionsStats": [{"name": "redis-total-connections-received-metric"}, {"name": "redis-rejected-connections-metric"}],
+        "NetworkThroughput": [{"name": "redis-net-input-throughput-bytes-metric"}, {"name": "redis-net-output-throughput-bytes-metric"}],
+        "ConnectedReplicas": [{"name": "redis-connected-slaves-metric", "functions": [{"kind": "max"}]}],
+    }
+
+
 MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "prometheus": PrometheusMonitor,
     "mysql": MySQLMonitor,
     "kafka": KafkaMonitor,
+    "redis": RedisMonitor,
 }
 
 
