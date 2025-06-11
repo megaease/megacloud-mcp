@@ -362,6 +362,155 @@ class PostgreSQLMonitor(MiddlewareMonitorInterface):
     }
 
 
+class ElasticSearchMonitor(MiddlewareMonitorInterface):
+    monitor_metrics = {
+        "Connections": [
+            {
+                "name": "elasticsearch-http-total-opened-ratio-metric",
+            },
+        ],
+        "SearchCount": [
+            {
+                "name": "elasticsearch-indices-search-query-total-ratio-metric",
+            },
+            {
+                "name": "elasticsearch-indices-search-fetch-total-ratio-metric",
+            },
+        ],
+        "SearchTime": [
+            {
+                "name": "elasticsearch-indices-search-query-time-in-millis-ratio-metric",
+            },
+            {
+                "name": "elasticsearch-indices-search-fetch-time-in-millis-ratio-metric",
+            },
+        ],
+        "JVM": [
+            {
+                "name": "elasticsearch-jvm-mem-heap-used-in-bytes-sum-metric",
+            },
+            {
+                "name": "elasticsearch-jvm-mem-non-heap-used-in-bytes-sum-metric",
+            },
+            {
+                "name": "elasticsearch-jvm-mem-pools-old-used-in-bytes-sum-metric",
+            },
+            {
+                "name": "elasticsearch-jvm-mem-pools-survivor-used-in-bytes-sum-metric",
+            },
+            {
+                "name": "elasticsearch-jvm-mem-pools-young-used-in-bytes-sum-metric",
+            },
+        ],
+        "GCCountRate": [
+            {
+                "name": "elasticsearch-jvm-gc-collectors-young-collection-count-metric",
+                "functions": [
+                    {
+                        "kind": "increment",
+                    },
+                ],
+            },
+            {
+                "name": "elasticsearch-jvm-gc-collectors-old-collection-count-metric",
+                "functions": [
+                    {
+                        "kind": "increment",
+                    },
+                ],
+            },
+        ],
+        "GCTimeRate": [
+            {
+                "name": "elasticsearch-jvm-gc-collectors-young-collection-time-in-millis-metric",
+                "functions": [
+                    {
+                        "kind": "increment",
+                    },
+                ],
+            },
+            {
+                "name": "elasticsearch-jvm-gc-collectors-old-collection-time-in-millis-metric",
+                "functions": [
+                    {
+                        "kind": "increment",
+                    },
+                ],
+            },
+        ],
+        "TranslogOperation": [
+            {
+                "name": "elasticsearch-indices-translog-operations-metric",
+                "functions": [
+                    {
+                        "kind": "max",
+                    },
+                ],
+            },
+        ],
+        "TranslogOperationSizeInBytes": [
+            {
+                "name": "elasticsearch-indices-translog-size-in-bytes-metric",
+                "functions": [
+                    {
+                        "kind": "max",
+                    },
+                ],
+            },
+        ],
+        "DocumentsCount": [
+            {
+                "name": "elasticsearch-indices-docs-count-metric",
+                "functions": [
+                    {
+                        "kind": "max",
+                    },
+                ],
+            },
+        ],
+        "DocumentsIndexedRate": [
+            {
+                "name": "elasticsearch-indices-indexing-index-total-metric",
+                "functions": [
+                    {
+                        "kind": "increment",
+                    },
+                ],
+            },
+        ],
+        "DocumentsDeletedRate": [
+            {
+                "name": "elasticsearch-indices-docs-deleted-metric",
+                "functions": [
+                    {
+                        "kind": "increment",
+                    },
+                ],
+            },
+        ],
+        "DocumentsMergedRate": [
+            {
+                "name": "elasticsearch-indices-merges-total-metric",
+                "functions": [
+                    {
+                        "kind": "increment",
+                    },
+                ],
+            },
+        ],
+        "DocumentsMergedBytes": [
+            {
+                "name": "elasticsearch-indices-merges-total-size-in-bytes-metric",
+                "functions": [
+                    {
+                        "kind": "increment",
+                    },
+                ],
+            },
+        ],
+    }
+
+
 MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "prometheus": PrometheusMonitor,
     "mysql": MySQLMonitor,
@@ -369,6 +518,7 @@ MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "redis": RedisMonitor,
     "nginx": NginxMonitor,
     "postgresql": PostgreSQLMonitor,
+    "elasticsearch": ElasticSearchMonitor,
 }
 
 
