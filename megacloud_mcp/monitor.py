@@ -312,12 +312,63 @@ class NginxMonitor(MiddlewareMonitorInterface):
     }
 
 
+class PostgreSQLMonitor(MiddlewareMonitorInterface):
+    monitor_metrics = {
+        "Connections": [
+            {
+                "name": "postgresql-numbackends-max-by-postgresql-datname-metric",
+            },
+        ],
+        "Transactions": [
+            {
+                "name": "postgresql-xact-commit-ratio-metric",
+            },
+            {
+                "name": "postgresql-xact-rollback-ratio-metric",
+            },
+        ],
+        "QueryRows": [
+            {
+                "name": "postgresql-tup-returned-ratio-metric",
+            },
+            {
+                "name": "postgresql-tup-fetched-ratio-metric",
+            },
+        ],
+        "ModifyRows": [
+            {
+                "name": "postgresql-tup-inserted-ratio-metric",
+            },
+            {
+                "name": "postgresql-tup-updated-ratio-metric",
+            },
+            {
+                "name": "postgresql-tup-deleted-ratio-metric",
+            },
+        ],
+        "TemplateFileInfo": [
+            {
+                "name": "postgresql-temp-files-ratio-metric",
+            },
+            {
+                "name": "postgresql-temp-bytes-ratio-metric",
+            },
+        ],
+        "Deadlocks": [
+            {
+                "name": "postgresql-deadlocks-ratio-metric",
+            },
+        ],
+    }
+
+
 MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "prometheus": PrometheusMonitor,
     "mysql": MySQLMonitor,
     "kafka": KafkaMonitor,
     "redis": RedisMonitor,
     "nginx": NginxMonitor,
+    "postgresql": PostgreSQLMonitor,
 }
 
 
