@@ -733,6 +733,140 @@ class MongoDBMonitor(MiddlewareMonitorInterface):
     }
 
 
+class ZookeeperMonitor(MiddlewareMonitorInterface):
+    monitor_metrics = {
+        "ZnodeCountMax": [
+            {
+                "name": "zookeeper-znode-count-metric",
+                "functions": [{"kind": "max"}],
+            },
+        ],
+        "DataSizeApproximateMax": [
+            {
+                "name": "zookeeper-approximate-data-size-metric",
+                "functions": [{"kind": "max"}],
+            },
+        ],
+        "FileDescriptorCount": [
+            {
+                "name": "zookeeper-open-file-descriptor-count-metric",
+                "functions": [{"kind": "max"}],
+            },
+            {
+                "name": "zookeeper-max-file-descriptor-count-max-metric",
+            },
+        ],
+        "PacketsSentReceivedRate": [
+            {
+                "name": "zookeeper-packets-sent-metric",
+                "functions": [{"kind": "increment"}],
+            },
+            {
+                "name": "zookeeper-packets-received-metric",
+                "functions": [{"kind": "increment"}],
+            },
+        ],
+        "SessionCount": [
+            {
+                "name": "zookeeper-global-sessions-metric",
+                "functions": [{"kind": "max"}],
+            },
+            {
+                "name": "zookeeper-local-sessions-metric",
+                "functions": [{"kind": "max"}],
+            },
+        ],
+        "ConnectionCount": [
+            {
+                "name": "zookeeper-connection-request-count-metric",
+                "functions": [{"kind": "max"}],
+            },
+            {
+                "name": "zookeeper-num-alive-connections-metric",
+                "functions": [{"kind": "max"}],
+            },
+            {
+                "name": "zookeeper-connection-rejected-metric",
+                "functions": [{"kind": "max"}],
+            },
+        ],
+        "WatchCountMax": [
+            {
+                "name": "zookeeper-watch-count-metric",
+                "functions": [{"kind": "max"}],
+            },
+        ],
+        "BytesReceivedRate": [
+            {
+                "name": "zookeeper-bytes-received-count-ratio-metric",
+            },
+        ],
+        "LatencyStats": [
+            {
+                "name": "zookeeper-max-latency-metric",
+                "functions": [{"kind": "max"}],
+            },
+            {
+                "name": "zookeeper-avg-latency-avg-metric",
+            },
+            {
+                "name": "zookeeper-min-latency-metric",
+                "functions": [{"kind": "min"}],
+            },
+        ],
+        "SnapshotTimeStats": [
+            {
+                "name": "zookeeper-max-snapshottime-metric",
+                "functions": [{"kind": "max"}],
+            },
+            {
+                "name": "zookeeper-min-snapshottime-metric",
+                "functions": [{"kind": "min"}],
+            },
+            {
+                "name": "zookeeper-sum-snapshottime-metric",
+                "functions": [{"kind": "max"}],
+            },
+        ],
+        "FsyncTimeStats": [
+            {
+                "name": "zookeeper-max-fsynctime-metric",
+                "functions": [{"kind": "max"}],
+            },
+            {
+                "name": "zookeeper-min-fsynctime-metric",
+                "functions": [{"kind": "min"}],
+            },
+            {
+                "name": "zookeeper-sum-fsynctime-metric",
+                "functions": [{"kind": "max"}],
+            },
+        ],
+        "JvmPauseTimeStats": [
+            {
+                "name": "zookeeper-max-jvm-pause-time-ms-metric",
+                "functions": [{"kind": "max"}],
+            },
+            {
+                "name": "zookeeper-min-jvm-pause-time-ms-metric",
+                "functions": [{"kind": "min"}],
+            },
+            {
+                "name": "zookeeper-p50-jvm-pause-time-ms-metric",
+                "functions": [{"kind": "max"}],
+            },
+            {
+                "name": "zookeeper-p95-jvm-pause-time-ms-metric",
+                "functions": [{"kind": "min"}],
+            },
+            {
+                "name": "zookeeper-p99-jvm-pause-time-ms-metric",
+                "functions": [{"kind": "max"}],
+            },
+        ],
+    }
+
+
 MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "prometheus": PrometheusMonitor,
     "mysql": MySQLMonitor,
@@ -744,6 +878,7 @@ MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "docker": DockerMonitor,
     "minio": MinIOMonitor,
     "mongodb": MongoDBMonitor,
+    "zookeeper": ZookeeperMonitor,
 }
 
 
