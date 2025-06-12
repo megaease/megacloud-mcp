@@ -632,6 +632,107 @@ class MinIOMonitor(MiddlewareMonitorInterface):
     }
 
 
+class MongoDBMonitor(MiddlewareMonitorInterface):
+    monitor_metrics = {
+        "CurrentConnections": [
+            {"name": "mongodb-connections-current-sum-metric"},
+        ],
+        "CommandThroughputRate": [
+            {
+                "name": "mongodb-find-command-total-ratio-metric",
+            },
+            {
+                "name": "mongodb-find-and-modify-command-total-ratio-metric",
+            },
+            {
+                "name": "mongodb-distinct-command-total-ratio-metric",
+            },
+            {
+                "name": "mongodb-count-command-total-ratio-metric",
+            },
+            {
+                "name": "mongodb-delete-command-total-ratio-metric",
+            },
+            {
+                "name": "mongodb-get-more-command-total-ratio-metric",
+            },
+            {
+                "name": "mongodb-insert-command-total-ratio-metric",
+            },
+            {
+                "name": "mongodb-update-command-total-ratio-metric",
+            },
+            {
+                "name": "mongodb-aggregate-command-total-ratio-metric",
+            },
+        ],
+        "LatencyRate": [
+            {"name": "mongodb-latency-reads-count-ratio-metric"},
+            {"name": "mongodb-latency-writes-count-ratio-metric"},
+            {"name": "mongodb-latency-reads-ratio-metric"},
+            {"name": "mongodb-latency-writes-ratio-metric"},
+        ],
+        "ReplLagCardinality": [
+            {"name": "mongodb-repl-lag-cardinality-metric"},
+        ],
+        "CursorCount": [
+            {
+                "name": "mongodb-cursor-total-count-max-metric",
+            },
+            {
+                "name": "mongodb-cursor-pinned-count-max-metric",
+            },
+            {
+                "name": "mongodb-cursor-timed-out-count-max-metric",
+            },
+            {
+                "name": "mongodb-cursor-no-timeout-count-max-metric",
+            },
+        ],
+        "DocumentOpRate": [
+            {
+                "name": "mongodb-document-deleted-ratio-metric",
+            },
+            {
+                "name": "mongodb-document-inserted-ratio-metric",
+            },
+            {
+                "name": "mongodb-document-returned-ratio-metric",
+            },
+            {
+                "name": "mongodb-document-updated-ratio-metric",
+            },
+        ],
+        "NetInBytesRate": [
+            {
+                "name": "mongodb-net-in-bytes-count-ratio-metric",
+            },
+            {
+                "name": "mongodb-net-in-bytes-count-ratio-metric",
+            },
+        ],
+        "QueuedRequestsCount": [
+            {"name": "mongodb-queued-reads-sum-metric"},
+            {"name": "mongodb-queued-writes-sum-metric"},
+        ],
+        "ResidentMemoryMB": [
+            {
+                "name": "mongodb-resident-megabytes-max-metric",
+            },
+        ],
+        "PageFaultsMax": [
+            {
+                "name": "mongodb-page-faults-max-metric",
+            },
+        ],
+        "DataSizeMax": [
+            {
+                "name": "mongodb-data-size-max-metric",
+            },
+        ],
+    }
+
+
 MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "prometheus": PrometheusMonitor,
     "mysql": MySQLMonitor,
@@ -642,6 +743,7 @@ MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "elasticsearch": ElasticSearchMonitor,
     "docker": DockerMonitor,
     "minio": MinIOMonitor,
+    "mongodb": MongoDBMonitor,
 }
 
 
