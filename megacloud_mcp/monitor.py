@@ -314,12 +314,12 @@ class NginxMonitor(MiddlewareMonitorInterface):
 
 class PostgreSQLMonitor(MiddlewareMonitorInterface):
     monitor_metrics = {
-        "Connections": [
+        "NumBackendsMax": [
             {
                 "name": "postgresql-numbackends-max-by-postgresql-datname-metric",
             },
         ],
-        "Transactions": [
+        "XactCommitRollbackRate": [
             {
                 "name": "postgresql-xact-commit-ratio-metric",
             },
@@ -327,7 +327,7 @@ class PostgreSQLMonitor(MiddlewareMonitorInterface):
                 "name": "postgresql-xact-rollback-ratio-metric",
             },
         ],
-        "QueryRows": [
+        "RowsQueryRate": [
             {
                 "name": "postgresql-tup-returned-ratio-metric",
             },
@@ -335,7 +335,7 @@ class PostgreSQLMonitor(MiddlewareMonitorInterface):
                 "name": "postgresql-tup-fetched-ratio-metric",
             },
         ],
-        "ModifyRows": [
+        "RowsModifyRate": [
             {
                 "name": "postgresql-tup-inserted-ratio-metric",
             },
@@ -346,7 +346,7 @@ class PostgreSQLMonitor(MiddlewareMonitorInterface):
                 "name": "postgresql-tup-deleted-ratio-metric",
             },
         ],
-        "TemplateFileInfo": [
+        "TempFilesInfoRate": [
             {
                 "name": "postgresql-temp-files-ratio-metric",
             },
@@ -354,7 +354,7 @@ class PostgreSQLMonitor(MiddlewareMonitorInterface):
                 "name": "postgresql-temp-bytes-ratio-metric",
             },
         ],
-        "Deadlocks": [
+        "DeadlocksRate": [
             {
                 "name": "postgresql-deadlocks-ratio-metric",
             },
@@ -364,12 +364,12 @@ class PostgreSQLMonitor(MiddlewareMonitorInterface):
 
 class ElasticSearchMonitor(MiddlewareMonitorInterface):
     monitor_metrics = {
-        "Connections": [
+        "HttpTotalOpenedRatio": [
             {
                 "name": "elasticsearch-http-total-opened-ratio-metric",
             },
         ],
-        "SearchCount": [
+        "IndicesSearchQueryCount": [
             {
                 "name": "elasticsearch-indices-search-query-total-ratio-metric",
             },
@@ -377,7 +377,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 "name": "elasticsearch-indices-search-fetch-total-ratio-metric",
             },
         ],
-        "SearchTime": [
+        "IndicesSearchQueryTimeMillis": [
             {
                 "name": "elasticsearch-indices-search-query-time-in-millis-ratio-metric",
             },
@@ -385,7 +385,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 "name": "elasticsearch-indices-search-fetch-time-in-millis-ratio-metric",
             },
         ],
-        "JVM": [
+        "JvmMemoryUsedBytes": [
             {
                 "name": "elasticsearch-jvm-mem-heap-used-in-bytes-sum-metric",
             },
@@ -402,7 +402,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 "name": "elasticsearch-jvm-mem-pools-young-used-in-bytes-sum-metric",
             },
         ],
-        "GCCountRate": [
+        "JvmGcCollectionCountRate": [
             {
                 "name": "elasticsearch-jvm-gc-collectors-young-collection-count-metric",
                 "functions": [
@@ -420,7 +420,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 ],
             },
         ],
-        "GCTimeRate": [
+        "JvmGcCollectionTimeMillisRate": [
             {
                 "name": "elasticsearch-jvm-gc-collectors-young-collection-time-in-millis-metric",
                 "functions": [
@@ -438,7 +438,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 ],
             },
         ],
-        "TranslogOperation": [
+        "IndicesTranslogOperations": [
             {
                 "name": "elasticsearch-indices-translog-operations-metric",
                 "functions": [
@@ -448,7 +448,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 ],
             },
         ],
-        "TranslogOperationSizeInBytes": [
+        "IndicesTranslogSizeBytes": [
             {
                 "name": "elasticsearch-indices-translog-size-in-bytes-metric",
                 "functions": [
@@ -458,7 +458,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 ],
             },
         ],
-        "DocumentsCount": [
+        "IndicesDocsCount": [
             {
                 "name": "elasticsearch-indices-docs-count-metric",
                 "functions": [
@@ -468,7 +468,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 ],
             },
         ],
-        "DocumentsIndexedRate": [
+        "IndicesDocsIndexedRate": [
             {
                 "name": "elasticsearch-indices-indexing-index-total-metric",
                 "functions": [
@@ -478,7 +478,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 ],
             },
         ],
-        "DocumentsDeletedRate": [
+        "IndicesDocsDeletedRate": [
             {
                 "name": "elasticsearch-indices-docs-deleted-metric",
                 "functions": [
@@ -488,7 +488,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 ],
             },
         ],
-        "DocumentsMergedRate": [
+        "IndicesMergesTotalRate": [
             {
                 "name": "elasticsearch-indices-merges-total-metric",
                 "functions": [
@@ -498,7 +498,7 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
                 ],
             },
         ],
-        "DocumentsMergedBytes": [
+        "IndicesMergesTotalSizeBytes": [
             {
                 "name": "elasticsearch-indices-merges-total-size-in-bytes-metric",
                 "functions": [
@@ -513,21 +513,21 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
 
 class DockerMonitor(MiddlewareMonitorInterface):
     monitor_metrics = {
-        "CPU": [
+        "CpuUsagePercent": [
             {
                 "name": "docker-cpu-usage-percent-max-by-container-name-metric",
             },
         ],
-        "Memory": [
+        "MemoryUsage": [
             {"name": "docker-mem-usage-max-by-container-name-metric"},
             {"name": "docker-mem-rss-max-by-container-name-metric"},
             {"name": "docker-mem-cache-max-by-container-name-metric"},
         ],
-        "NetWork": [
+        "NetworkBytesRatio": [
             {"name": "docker-net-rx-bytes-ratio-metric"},
             {"name": "docker-net-tx-bytes-ratio-metric"},
         ],
-        "DiskIO": [
+        "DiskIoBytesRatio": [
             {
                 "name": "docker-blkio-io-service-bytes-recursive-read-ratio-metric",
             },
@@ -541,7 +541,7 @@ class DockerMonitor(MiddlewareMonitorInterface):
                 "name": "docker-n-used-file-descriptors-metric",
             },
         ],
-        "Containers": [
+        "ContainersCount": [
             {
                 "functions": [{"kind": "avg"}],
                 "name": "docker-n-containers-metric",
@@ -559,7 +559,7 @@ class DockerMonitor(MiddlewareMonitorInterface):
                 "name": "docker-n-containers-paused-metric",
             },
         ],
-        "Images": [
+        "ImagesCount": [
             {
                 "functions": [{"kind": "avg"}],
                 "name": "docker-n-images-metric",
