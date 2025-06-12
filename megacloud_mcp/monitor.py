@@ -568,6 +568,70 @@ class DockerMonitor(MiddlewareMonitorInterface):
     }
 
 
+class MinIOMonitor(MiddlewareMonitorInterface):
+    monitor_metrics = {
+        "BucketUsageObjectCount": [
+            {
+                "name": "minio-bucket-usage-object-total-max-by-bucket-metric",
+            },
+        ],
+        "BucketUsageTotalBytes": [
+            {
+                "name": "minio-bucket-usage-total-bytes-max-by-bucket-metric",
+            },
+        ],
+        "ClusterNodesCount": [
+            {
+                "name": "minio-cluster-nodes-offline-total-max-metric",
+            },
+            {
+                "name": "minio-cluster-nodes-online-total-max-metric",
+            },
+        ],
+        "ClusterDisksCount": [
+            {
+                "name": "minio-cluster-disk-offline-total-max-metric",
+            },
+            {
+                "name": "minio-cluster-disk-online-total-max-metric",
+            },
+        ],
+        "ClusterCapacityUsableBytes": [
+            {
+                "name": "minio-cluster-capacity-usable-free-bytes-max-metric",
+            },
+            {
+                "name": "minio-cluster-capacity-usable-total-bytes-max-metric",
+            },
+        ],
+        "NodeDiskFreeBytes": [
+            {
+                "name": "minio-node-disk-free-bytes-max-by-disk-metric",
+            },
+        ],
+        "S3TrafficReceivedBytes": [
+            {
+                "name": "minio-s3-traffic-received-bytes-max-metric",
+            },
+        ],
+        "S3TrafficSentBytes": [
+            {
+                "name": "minio-s3-traffic-sent-bytes-max-metric",
+            },
+        ],
+        "NodeMemoryUsedBytes": [
+            {
+                "name": "minio-node-process-resident-memory-bytes-max-metric",
+            },
+        ],
+        "NodeCpuTimeRatio": [
+            {
+                "name": "minio-node-process-cpu-total-seconds-ratio-metric",
+            },
+        ],
+    }
+
+
 MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "prometheus": PrometheusMonitor,
     "mysql": MySQLMonitor,
@@ -577,6 +641,7 @@ MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "postgresql": PostgreSQLMonitor,
     "elasticsearch": ElasticSearchMonitor,
     "docker": DockerMonitor,
+    "minio": MinIOMonitor,
 }
 
 
