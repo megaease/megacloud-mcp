@@ -511,6 +511,63 @@ class ElasticSearchMonitor(MiddlewareMonitorInterface):
     }
 
 
+class DockerMonitor(MiddlewareMonitorInterface):
+    monitor_metrics = {
+        "CPU": [
+            {
+                "name": "docker-cpu-usage-percent-max-by-container-name-metric",
+            },
+        ],
+        "Memory": [
+            {"name": "docker-mem-usage-max-by-container-name-metric"},
+            {"name": "docker-mem-rss-max-by-container-name-metric"},
+            {"name": "docker-mem-cache-max-by-container-name-metric"},
+        ],
+        "NetWork": [
+            {"name": "docker-net-rx-bytes-ratio-metric"},
+            {"name": "docker-net-tx-bytes-ratio-metric"},
+        ],
+        "DiskIO": [
+            {
+                "name": "docker-blkio-io-service-bytes-recursive-read-ratio-metric",
+            },
+            {
+                "name": "docker-blkio-io-service-bytes-recursive-write-ratio-metric",
+            },
+        ],
+        "UsedFileDescriptors": [
+            {
+                "functions": [{"kind": "avg"}],
+                "name": "docker-n-used-file-descriptors-metric",
+            },
+        ],
+        "Containers": [
+            {
+                "functions": [{"kind": "avg"}],
+                "name": "docker-n-containers-metric",
+            },
+            {
+                "functions": [{"kind": "avg"}],
+                "name": "docker-n-containers-running-metric",
+            },
+            {
+                "functions": [{"kind": "avg"}],
+                "name": "docker-n-containers-stopped-metric",
+            },
+            {
+                "functions": [{"kind": "avg"}],
+                "name": "docker-n-containers-paused-metric",
+            },
+        ],
+        "Images": [
+            {
+                "functions": [{"kind": "avg"}],
+                "name": "docker-n-images-metric",
+            },
+        ],
+    }
+
+
 MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "prometheus": PrometheusMonitor,
     "mysql": MySQLMonitor,
@@ -519,6 +576,7 @@ MIDDLEWARE_MONITOR_MAP: Dict[str, Type[MiddlewareMonitorInterface]] = {
     "nginx": NginxMonitor,
     "postgresql": PostgreSQLMonitor,
     "elasticsearch": ElasticSearchMonitor,
+    "docker": DockerMonitor,
 }
 
 
