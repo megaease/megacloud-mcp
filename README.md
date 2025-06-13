@@ -174,3 +174,31 @@ Set MegaCloud MCP server with following config:
     }
 }
 ```
+
+#### Run with Docker
+
+Build the image:
+```
+docker build -t megaease/megacloud-mcp . 
+```
+
+Settings:
+```json
+{
+    "megacloud-mcp": {
+        "type": "stdio",
+        "command": "docker",
+        "args": [
+            "run",
+            "-i", 
+            "--rm",
+            "-e",
+            "MEGACLOUD_AUTHTOKEN",
+            "megaease/megacloud-mcp"
+        ],
+        "env": {
+            "MEGACLOUD_AUTHTOKEN": "<your-auth-token>"
+        }
+    }
+}
+```
